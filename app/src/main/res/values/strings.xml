@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">AvMooViewer</string>
+    <string name="all_vid">All</string>
+    <string name="load_failed">Load Failed!</string>
+    <string name="actress" >Actress</string>
+    <string name="category">Category</string>
+    <string name="no_more">No More!</string>
+    <string name="name">Name:</string>
+    <string name="id">ID:</string>
+    <string name="date">Date:</string>
+    <string name="refresh">Refresh</string>
+    <string name="preview">Preview</string>
+    <string name="load_finished">Load finished</string>
+    <string name="collections">Collections</string>
+    <string name="search_for">Search for:</string>
+</resources>

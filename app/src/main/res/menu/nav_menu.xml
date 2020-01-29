@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_all_vids"
+        android:icon="@drawable/home"
+        android:title="@string/all_vid" />
+    <item
+        android:id="@+id/menu_actress"
+        android:icon="@drawable/woman"
+        android:title="@string/actress" />
+    <item
+        android:id="@+id/menu_category"
+        android:title="@string/category" />
+    <item
+        android:id="@+id/menu_collections"
+        android:title="@string/collections" />
+</menu>
