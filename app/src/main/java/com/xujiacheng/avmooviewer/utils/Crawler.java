@@ -13,13 +13,13 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 
 public class Crawler {
-    private static final String TAG = "Crawler";
+
 
     public static ArrayList<Av> getAvList(String html) {
         ArrayList<Av> avArrayList = new ArrayList<>();
         Document document = Jsoup.parse(html);
         //document.querySelector("body > div.container-fluid > div.alert.alert-danger")
-        Elements danger = document.select("body > div.container-fluid > div.alert.alert-danger");
+
 //        if (danger != null || danger.size() > 0) {
 //            return avArrayList;
 //        }
@@ -51,12 +51,10 @@ public class Crawler {
         Document document = Jsoup.parse(response);
         //获取标题
         //title document.querySelector("body > div.container > h3")
-        String title = document.select("body > div.container > h3").text();
-        av.name = title;
+        av.name = document.select("body > div.container > h3").text();
         //获取封面大图片
         // cover document.querySelector("body > div.container > div.row.movie > div.col-md-9.screencap > a > img")
-        String bigCoverURL = document.select("body > div.container > div.row.movie > div.col-md-9.screencap > a.bigImage > img").attr("src");
-        av.bigCoverURL = bigCoverURL;
+        av.bigCoverURL = document.select("body > div.container > div.row.movie > div.col-md-9.screencap > a.bigImage > img").attr("src");
         //document.querySelector("body > div.container > div.row.movie > div.col-md-3.info > p:nth-child(1)")
         //获取详细信息
         Elements infoElements = document.select("body > div.container > div.row.movie > div.col-md-3.info > p");

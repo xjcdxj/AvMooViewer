@@ -1,66 +1,52 @@
 package com.xujiacheng.avmooviewer;
 
+import android.os.Bundle;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.xujiacheng.avmooviewer.ui.actress.ActressFragment;
 import com.xujiacheng.avmooviewer.ui.allvideos.AllAvFragment;
-import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 import com.xujiacheng.avmooviewer.ui.collections.CollectionsFragment;
-import com.xujiacheng.avmooviewer.utils.Collections;
 import com.xujiacheng.avmooviewer.utils.RunningTask;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int SEARCH = 1;
-    public static final String fragment_type = "FRAGMENT_TYPE";
-    private NavController navController;
+    //收藏视频的文件保存地址
     public static File CollectionDir;
+    private static FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //在外部存储沙盒内
         CollectionDir = getExternalFilesDir("Collections");
-        try {
-            File file = new File(CollectionDir, "collections.txt");
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write("test");
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         NavigationView navigationView = findViewById(R.id.navigation_view);
-//        navController = Navigation.findNavController(this, R.id.fragment);
         final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-        final FragmentTransaction transaction = fragmentManager.beginTransaction();
+        mFragmentManager = getSupportFragmentManager();
+        final FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        //默认启动是主页，全部视频
         transaction.replace(R.id.container, new AllAvFragment());
-
         transaction.commit();
+        //左侧菜单导航到各个功能的fragment
+        //这几个fragment作为顶级界面，不加入返回栈
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                drawerLayout.closeDrawers();
+                FragmentTransaction transaction = mFragmentManager.beginTransaction();
                 switch (menuItem.getItemId()) {
                     case R.id.menu_all_vids:
                         transaction.replace(R.id.container, new AllAvFragment());
-                        Toast.makeText(MainActivity.this, "all", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.menu_actress:
                         transaction.replace(R.id.container, new ActressFragment());
@@ -71,9 +57,24 @@ public class MainActivity extends AppCompatActivity {
                         transaction.replace(R.id.container, new CollectionsFragment());
                 }
                 transaction.commit();
-                drawerLayout.closeDrawers();
                 return false;
             }
         });
+    }
+
+    public static void changeFragment(Fragment destination, boolean isHomeView) {
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        if (!isHomeView) {
+            transaction.addToBackStack(null);
+        }
+        transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
+        transaction.replace(R.id.container, destination);
+        transaction.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RunningTask.cleanAlltask();
     }
 }

@@ -1,40 +1,24 @@
 package com.xujiacheng.avmooviewer.ui.allvideos;
 
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.xujiacheng.avmooviewer.itembean.Av;
+import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.utils.Crawler;
-import com.xujiacheng.avmooviewer.utils.InternetRequest;
 import com.xujiacheng.avmooviewer.utils.RunningTask;
 
 import java.util.ArrayList;
 
-public class AllVideoViewModel extends ViewModel {
-    private static final String TAG = "AllVideoViewModel";
+public class AllVideoViewModel extends BaseViewModel {
     MutableLiveData<ArrayList<Av>> allAvData;
-    private int currentPage = 1;
-    private InternetRequest internetRequest;
     private static final String ALL_VID_URL = "https://avmask.com/cn/page/%s";
-    private int responseStatus;
-    public final static int DATA_READY = 1;
-    public final static int RESPONSE_ERROR = 2;
-    public final static int NO_MORE = 3;
 
-    public int getResponseStatus() {
-        return responseStatus;
-    }
-
-    public void setResponseStatus(int responseStatus) {
-        this.responseStatus = responseStatus;
-    }
 
     public AllVideoViewModel() {
         allAvData = new MutableLiveData<>(new ArrayList<Av>());
-        internetRequest = new InternetRequest();
     }
 
-    public void initAllData() {
+    void initAllData() {
         this.currentPage = 1;
         RunningTask.addTask(new Runnable() {
             @Override
@@ -44,21 +28,22 @@ public class AllVideoViewModel extends ViewModel {
                 if (html != null) {
                     avList = Crawler.getAvList(html);
                     if (avList.size() > 0) {
-                        setResponseStatus(DATA_READY);
-                        if (avList.size() < 30) {
-                            setResponseStatus(NO_MORE);
-                        }
+                        setLoadSuccess(true);
+                    }
+                    if (avList.size() < 30) {
+                        setLoadFinished(true);
                     }
                 } else {
-                    setResponseStatus(RESPONSE_ERROR);
+                    setLoadSuccess(false);
                 }
+                setDataReady(true);
                 allAvData.postValue(avList);
             }
         });
 
     }
 
-    public void loadMore() {
+    void loadMore() {
         this.currentPage++;
         RunningTask.addTask(new Runnable() {
             @Override
@@ -68,18 +53,18 @@ public class AllVideoViewModel extends ViewModel {
                 if (html != null) {
                     ArrayList<Av> avList = Crawler.getAvList(html);
                     if (avList.size() > 0) {
+                        setLoadSuccess(true);
+                        assert data != null;
                         data.addAll(avList);
-
-                        if (avList.size() < 30) {
-                            setResponseStatus(NO_MORE);
-                        }
+                    }
+                    if (avList.size() < 30) {
+                        setLoadFinished(true);
                     }
                 } else {
-                    setResponseStatus(RESPONSE_ERROR);
+                    setLoadSuccess(false);
                 }
-                setResponseStatus(DATA_READY);
+                setDataReady(true);
                 allAvData.postValue(data);
-
             }
         });
     }

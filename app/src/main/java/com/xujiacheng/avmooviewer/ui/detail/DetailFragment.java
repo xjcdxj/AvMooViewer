@@ -1,25 +1,7 @@
 package com.xujiacheng.avmooviewer.ui.detail;
 
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
-import androidx.databinding.DataBindingComponent;
-import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
-import androidx.databinding.adapters.FrameLayoutBindingAdapter;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -34,21 +16,26 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
-import com.xujiacheng.avmooviewer.itembean.Actor;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.itembean.Info;
 import com.xujiacheng.avmooviewer.ui.actress.actressvideos.ActressesVideosFragment;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade;
 
@@ -58,7 +45,6 @@ public class DetailFragment extends Fragment {
 
 
     private DetailViewModel mViewModel;
-    private DetailViewModel detailViewModel;
 
 
     public DetailFragment() {
@@ -73,9 +59,9 @@ public class DetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
-        detailViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
 
-        detailViewModel.checkCollections(this.url);
+        mViewModel.checkCollections(this.url);
 
         final Toolbar toolbar = view.findViewById(R.id.detail_toolbar);
         toolbar.inflateMenu(R.menu.favorite);
@@ -93,10 +79,10 @@ public class DetailFragment extends Fragment {
         addToCollectionMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (detailViewModel.av.getValue().url == null) {
+                if (Objects.requireNonNull(mViewModel.av.getValue()).url == null) {
                     Toast.makeText(requireContext(), "Please wait", Toast.LENGTH_SHORT).show();
                 } else {
-                    detailViewModel.addToFavorite();
+                    mViewModel.addToFavorite();
                 }
                 return false;
             }
@@ -110,53 +96,44 @@ public class DetailFragment extends Fragment {
                 requireActivity().onBackPressed();
             }
         });
-        detailViewModel.isInCollection.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+        mViewModel.isInCollection.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-
                 if (aBoolean) {
                     addToCollectionMenu.setIcon(R.drawable.ic_star_black_24dp);
                 } else {
                     addToCollectionMenu.setIcon(R.drawable.ic_star_border_black_24dp);
-
-
                 }
             }
         });
-        detailViewModel.loadAvInfo(DetailFragment.this.url);
-        detailViewModel.av.observe(getViewLifecycleOwner(), new Observer<Av>() {
+        mViewModel.loadAvInfo(DetailFragment.this.url);
+        mViewModel.av.observe(getViewLifecycleOwner(), new Observer<Av>() {
             @Override
             public void onChanged(Av av) {
-                if (detailViewModel.isDataReady) {
+                if (mViewModel.isDataReady) {
                     Log.d(TAG, "onChanged: big cover" + av.bigCoverURL);
                     detailLoading.setVisibility(View.GONE);
                     detailScroll.setVisibility(View.VISIBLE);
-                    if (av.bigCoverImage != null) {
-                        cover.setImageBitmap(av.bigCoverImage);
-                        Log.d(TAG, "onChanged: load from file");
-                    } else {
-                        Glide.with(DetailFragment.this)
-                                .asBitmap()
-                                .load(av.bigCoverURL)
-                                .placeholder(R.drawable.avmooviewer)
+                    Glide.with(DetailFragment.this)
+                            .asBitmap()
+                            .load(av.bigCoverURL)
+                            .placeholder(R.drawable.avmooviewer)
 
-                                .listener(new RequestListener<Bitmap>() {
-                                    @Override
-                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                                        coverLoading.setVisibility(View.GONE);
-                                        return false;
-                                    }
+                            .listener(new RequestListener<Bitmap>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                    coverLoading.setVisibility(View.GONE);
+                                    return false;
+                                }
 
-                                    @Override
-                                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-//                                        detailViewModel.av.getValue().bigCoverImage = resource;
-                                        coverLoading.setVisibility(View.GONE);
-                                        return false;
-                                    }
-                                })
+                                @Override
+                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                    coverLoading.setVisibility(View.GONE);
+                                    return false;
+                                }
+                            })
+                            .into(cover);
 
-                                .into(cover);
-                    }
                     name.setText(av.name);
                     toolbar.setTitle(av.name);
                     id.setText(av.id);
@@ -173,29 +150,10 @@ public class DetailFragment extends Fragment {
                             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             imageView.setPadding(4, 4, 4, 4);
                             imageView.setAdjustViewBounds(true);
-                            if (detailViewModel.av.getValue().previewImage != null && detailViewModel.av.getValue().previewImage.size() == av.previewURL.size()) {
-                                Log.d(TAG, "onChanged: load from file");
-                                for (Bitmap bitmap : detailViewModel.av.getValue().previewImage) {
-                                    imageView.setImageBitmap(bitmap);
-                                }
-                            } else {
-                                Glide.with(DetailFragment.this)
-                                        .asBitmap()
-                                        .load(url)
-                                        .listener(new RequestListener<Bitmap>() {
-                                            @Override
-                                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                                                return false;
-                                            }
-
-                                            @Override
-                                            public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-//                                                detailViewModel.av.getValue().previewImage.add(resource);
-                                                return false;
-                                            }
-                                        })
-                                        .into(imageView);
-                            }
+                            Glide.with(DetailFragment.this)
+                                    .asBitmap()
+                                    .load(url)
+                                    .into(imageView);
                             detailContainer.addView(imageView);
                         }
                     }
@@ -212,14 +170,13 @@ public class DetailFragment extends Fragment {
         // TODO: Use the ViewModel
     }
 
+    //用于加载演员头像到gridView中
     class ActressAdapter extends BaseAdapter {
 
         private ArrayList<Info> mActresses;
         private final LayoutInflater inflater;
-        private ImageView header;
-        private TextView name;
 
-        public ActressAdapter(ArrayList<Info> mActresses) {
+        ActressAdapter(ArrayList<Info> mActresses) {
             this.mActresses = mActresses;
             inflater = LayoutInflater.from(requireContext());
         }
@@ -241,39 +198,30 @@ public class DetailFragment extends Fragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.item_actress, parent, false);
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MainActivity.changeFragment(new ActressesVideosFragment(getItem(position).url), false);
+                    }
+                });
 
-            convertView = inflater.inflate(R.layout.item_actress, null, false);
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.addToBackStack(null);
-                    transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
-                    transaction.replace(R.id.container, new ActressesVideosFragment(getItem(position).url));
-                    transaction.commit();
-                }
-            });
-            ActressViewHolder actressViewHolder = new ActressViewHolder(convertView);
-            header = convertView.findViewById(R.id.item_actress_header);
-            Glide.with(DetailFragment.this)
-                    .asBitmap()
-                    .load(getItem(position).imageURL)
-                    .transition(withCrossFade())
-                    .placeholder(R.drawable.woman)
-                    .fitCenter()
-                    .into(header);
-            name = convertView.findViewById(R.id.item_actress_name);
-            name.setText(getItem(position).name);
+                ImageView header = convertView.findViewById(R.id.item_actress_header);
+                Glide.with(DetailFragment.this)
+                        .asBitmap()
+                        .load(getItem(position).imageURL)
+                        .transition(withCrossFade())
+                        .placeholder(R.drawable.woman)
+                        .fitCenter()
+                        .into(header);
+                TextView name = convertView.findViewById(R.id.item_actress_name);
+                name.setText(getItem(position).name);
+            }
             return convertView;
         }
 
-        class ActressViewHolder {
-            private View itemView;
 
-            public ActressViewHolder(View itemView) {
-                this.itemView = itemView;
-            }
-        }
     }
 
 }

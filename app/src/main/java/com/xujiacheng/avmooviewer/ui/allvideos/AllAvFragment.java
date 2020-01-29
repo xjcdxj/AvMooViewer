@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -16,11 +15,11 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.base.BaseAdapter;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
-import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
 import com.xujiacheng.avmooviewer.ui.search.SearchFragment;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import java.util.Objects;
 
 public class AllAvFragment extends ShowAvsBaseFragment {
     private static final String TAG = "AllAvFragment";
-    private AllVideoViewModel allVideoViewModel;
+    private AllVideoViewModel mViewModel;
 
     @Override
     public boolean isHomeFragment() {
@@ -37,29 +36,19 @@ public class AllAvFragment extends ShowAvsBaseFragment {
 
     @Override
     public void uiOperation() {
+        this.mViewModel = new ViewModelProvider(requireActivity()).get(AllVideoViewModel.class);
         Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
-                switch (msg.what) {
-                    case BaseAdapter.LOAD_MORE:
-                        AllAvFragment.this.allVideoViewModel.loadMore();
-                        break;
-                    case BaseAdapter.ITEM_CLICK:
-                        break;
-//                        String url = (String) msg.obj;
-//                        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-//                        transaction.addToBackStack(null);
-//                        transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
-//                        transaction.replace(R.id.container, new DetailFragment(url));
-//                        transaction.commit();
+                if (msg.what == BaseAdapter.LOAD_MORE) {
+                    AllAvFragment.this.mViewModel.loadMore();
                 }
                 return false;
             }
         });
-        final AllVideosAdapter adapter = new AllVideosAdapter(handler);
-        this.allVideoViewModel = new ViewModelProvider(requireActivity()).get(AllVideoViewModel.class);
-//        this.allVideoViewModel = ViewModelProviders.of(requireActivity()).get(AllVideoViewModel.class);
-        toolbar.setTitle("All Videos");
+        final BaseAdapter adapter = new BaseAdapter(handler);
+//        this.mViewModel = ViewModelProviders.of(requireActivity()).get(AllVideoViewModel.class);
+        toolbar.setTitle(getString(R.string.home));
         toolbar.inflateMenu(R.menu.search);
         toolbar.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -71,12 +60,10 @@ public class AllAvFragment extends ShowAvsBaseFragment {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.menu_refresh:
-                        dataStatusChange(REFRESH_DATA);
-                        allVideoViewModel.initAllData();
-                        recyclerView.scrollToPosition(0);
-                        break;
+                if (item.getItemId() == R.id.menu_refresh) {
+                    dataStatusChange(REFRESH_DATA);
+                    mViewModel.initAllData();
+                    recyclerView.scrollToPosition(0);
                 }
                 return false;
             }
@@ -87,13 +74,8 @@ public class AllAvFragment extends ShowAvsBaseFragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "onQueryTextSubmit: " + query);
-                FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                 SearchFragment fragment = new SearchFragment(query);
-//                ObjectAnimator.ofFloat(fragment,"translationX",0,200)
-                transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
-                transaction.replace(R.id.container, fragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+                MainActivity.changeFragment(fragment, false);
                 searchView.onActionViewCollapsed();
                 return false;
             }
@@ -106,34 +88,30 @@ public class AllAvFragment extends ShowAvsBaseFragment {
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        this.allVideoViewModel.allAvData.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {
+        this.mViewModel.allAvData.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {
             @Override
             public void onChanged(ArrayList<Av> avs) {
-                switch (AllAvFragment.this.allVideoViewModel.getResponseStatus()) {
-                    case AllVideoViewModel.DATA_READY:
-                        dataStatusChange(LOAD_SUCCESS);
-//                        recyclerView.setVisibility(View.VISIBLE);
-                        break;
-                    case AllVideoViewModel.RESPONSE_ERROR:
-                        Toast.makeText(requireContext(), "Failed!", Toast.LENGTH_SHORT).show();
-                        dataStatusChange(LOAD_FAILED);
-                        break;
+                if (avs.size()>0){
+                    dataStatusChange(LOAD_SUCCESS);
                 }
-                if (avs.size() > 0) {
-                    loadingData.setVisibility(View.GONE);
+                if (mViewModel.isDataReady()) {
+                    adapter.setLoadFinished(mViewModel.isLoadFinished());
+                    adapter.setLoadSuccess(mViewModel.isLoadSuccess());
+                    Log.d(TAG, "onChanged: response = " + mViewModel.isLoadSuccess());
+                    if (!mViewModel.isLoadSuccess()) {
+                        if (avs.size() == 0) {
+                            dataStatusChange(LOAD_FAILED);
+                        }
+                    }
                 }
                 adapter.submitList(new ArrayList<>(avs));
-
-                AllAvFragment.this.allVideoViewModel.setResponseStatus(0);
+                mViewModel.initStatus();
             }
         });
-        if (Objects.requireNonNull(this.allVideoViewModel.allAvData.getValue()).size() == 0) {
-            Toast.makeText(requireContext(), "Loading...", Toast.LENGTH_SHORT).show();
+        if (Objects.requireNonNull(this.mViewModel.allAvData.getValue()).size() == 0) {
             dataStatusChange(REFRESH_DATA);
-            this.allVideoViewModel.initAllData();
+            this.mViewModel.initAllData();
         }
-
-
     }
 
 

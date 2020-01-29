@@ -2,6 +2,7 @@ package com.xujiacheng.avmooviewer.utils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -27,10 +28,10 @@ public class InternetRequest {
         try {
             Response response = okHttpClient.newCall(request).execute();
             if (response.code() == 200) {
-                html = new String(response.body().bytes(), StandardCharsets.UTF_8);
+                html = new String(Objects.requireNonNull(response.body()).bytes(), StandardCharsets.UTF_8);
             }
-        } catch (IOException e) {
-            return html;
+        } catch (IOException ignored) {
+
         }
         return html;
     }

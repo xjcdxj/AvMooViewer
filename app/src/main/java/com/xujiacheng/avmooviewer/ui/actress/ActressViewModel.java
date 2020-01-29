@@ -1,73 +1,70 @@
 package com.xujiacheng.avmooviewer.ui.actress;
 
-import android.util.Log;
-
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.xujiacheng.avmooviewer.itembean.Actor;
+import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.utils.Crawler;
-import com.xujiacheng.avmooviewer.utils.InternetRequest;
 import com.xujiacheng.avmooviewer.utils.RunningTask;
 
 import java.util.ArrayList;
 
-public class ActressViewModel extends ViewModel {
+public class ActressViewModel extends BaseViewModel {
     MutableLiveData<ArrayList<Actor>> actresses;
-    private final InternetRequest internetRequest;
-    private int actressPage = 1;
     private static final String ACTRESS_URL = "https://avmask.com/cn/actresses/page/%s";
-    boolean dataReady = false;
-    boolean success = false;
-    boolean isFinished=false;
 
     public ActressViewModel() {
         actresses = new MutableLiveData<>(new ArrayList<Actor>());
-        internetRequest = new InternetRequest();
+
     }
 
-    public void loadMoreActress() {
-        this.actressPage++;
+    void loadMoreActress() {
+        this.currentPage++;
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
-                String html = internetRequest.getHTML(String.format(ACTRESS_URL, actressPage));
+                String html = internetRequest.getHTML(String.format(ACTRESS_URL, currentPage));
+                ArrayList<Actor> value = actresses.getValue();
                 if (html != null) {
                     ArrayList<Actor> data = Crawler.getActresses(html);
-                    if (data.size()<50){
-                        isFinished=true;
+                    if (data.size() > 0) {
+                        setLoadSuccess(true);
                     }
-                    ArrayList<Actor> value = actresses.getValue();
+                    if (data.size() < 50) {
+                        setLoadFinished(true);
+                    }
+                    assert value != null;
                     value.addAll(data);
-
-                    actresses.postValue(value);
-
+                } else {
+                    setLoadSuccess(false);
                 }
+                setDataReady(true);
+                actresses.postValue(value);
             }
         });
 
     }
 
-    public void initData() {
-        this.actressPage = 1;
+    void initData() {
+        this.currentPage = 1;
 
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
-                String html = internetRequest.getHTML(String.format(ACTRESS_URL, actressPage));
+                String html = internetRequest.getHTML(String.format(ACTRESS_URL, currentPage));
                 ArrayList<Actor> data = new ArrayList<>();
                 if (html != null) {
                     data = Crawler.getActresses(html);
-                    if (data.size()<50){
-                        isFinished=true;
+                    if (data.size() > 0) {
+                        setLoadSuccess(true);
                     }
-                    dataReady = true;
-                    success = true;
-
+                    if (data.size() < 50) {
+                        setLoadFinished(true);
+                    }
                 } else {
-                    dataReady = true;
-                    success = false;
+                    setLoadSuccess(false);
                 }
+                setDataReady(true);
                 actresses.postValue(data);
             }
         });

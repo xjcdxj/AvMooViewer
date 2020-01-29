@@ -1,6 +1,6 @@
 package com.xujiacheng.avmooviewer.ui.actress;
 
-import android.os.Message;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,26 +13,17 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Actor;
-import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
-import com.xujiacheng.avmooviewer.ui.search.SearchViewModel;
-
-import java.security.MessageDigest;
+import com.xujiacheng.avmooviewer.ui.actress.actressvideos.ActressesVideosFragment;
 
 public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder> {
-    private ActressViewModel actressViewModel;
+    static int LOAD_MORE = 1;
     private boolean isLoadFinished = false;
+    private Handler mHandler;
 
-    public boolean isLoadFinished() {
-        return isLoadFinished;
-    }
-
-    public void setLoadFinished(boolean loadFinished) {
-        isLoadFinished = loadFinished;
-    }
-
-    public ActressAdapter(ActressViewModel actressViewModel) {
+    ActressAdapter(Handler handler) {
         super(new DiffUtil.ItemCallback<Actor>() {
             @Override
             public boolean areItemsTheSame(@NonNull Actor oldItem, @NonNull Actor newItem) {
@@ -44,8 +35,17 @@ public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder
                 return oldItem.url.equals(newItem.url);
             }
         });
-        this.actressViewModel = actressViewModel;
+        this.mHandler = handler;
     }
+
+    private boolean isLoadFinished() {
+        return isLoadFinished;
+    }
+
+    void setLoadFinished(boolean loadFinished) {
+        isLoadFinished = loadFinished;
+    }
+
 
 
     @NonNull
@@ -56,10 +56,11 @@ public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Message message = new Message();
-                message.what = ActressFragment.ITEM_CLICK;
-                message.obj = getItem(viewHolder.getAdapterPosition()).url;
-                ActressFragment.handler.sendMessage(message);
+                MainActivity.changeFragment(new ActressesVideosFragment(getItem(viewHolder.getAdapterPosition()).url), false);
+//                Message message = new Message();
+//                message.what = ActressFragment.ITEM_CLICK;
+//                message.obj = getItem(viewHolder.getAdapterPosition()).url;
+//                ActressFragment.handler.sendMessage(message);
 
             }
         });
@@ -76,19 +77,19 @@ public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder
                 .placeholder(R.drawable.woman)
                 .into(holder.header);
         if (position == getItemCount() - 1) {
-            if (!isLoadFinished) {
-                actressViewModel.loadMoreActress();
+            if (!isLoadFinished()) {
+                mHandler.sendEmptyMessage(LOAD_MORE);
             }
         }
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView header;
         private final TextView name;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             header = itemView.findViewById(R.id.item_actress_header);
             name = itemView.findViewById(R.id.item_actress_name);

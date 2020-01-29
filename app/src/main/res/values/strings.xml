@@ -13,4 +13,6 @@
     <string name="load_finished">Load finished</string>
     <string name="collections">Collections</string>
     <string name="search_for">Search for:</string>
+    <string name="home">Home</string>
+    <string name="failed">Failed</string>
 </resources>

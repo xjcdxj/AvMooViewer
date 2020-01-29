@@ -1,16 +1,13 @@
 package com.xujiacheng.avmooviewer.ui.search;
 
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.os.Handler;
 import android.os.Message;
-import android.view.View;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
@@ -18,10 +15,10 @@ import com.xujiacheng.avmooviewer.ui.base.BaseAdapter;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SearchFragment extends ShowAvsBaseFragment {
-    private static final String TAG = "SearchFragment";
-    public static String queryString;
+    private static String queryString;
     private SearchViewModel searchViewModel;
 
 
@@ -39,48 +36,41 @@ public class SearchFragment extends ShowAvsBaseFragment {
 
         searchViewModel = new ViewModelProvider(requireActivity()).get(SearchViewModel.class);
         toolbar.setTitle(getString(R.string.search_for) + queryString);
-        if (searchViewModel.queryString == null || searchViewModel.searchResult.getValue().size() == 0) {
+        if (searchViewModel.queryString == null || Objects.requireNonNull(searchViewModel.searchResult.getValue()).size() == 0) {
             searchViewModel.search(queryString);
-        }else {
-            searchViewModel.setResponseStatus(SearchViewModel.DATA_READY);
+        } else {
+            searchViewModel.setDataReady(true);
         }
 
         Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
-                switch (msg.what) {
-                    case BaseAdapter.LOAD_MORE:
-                        searchViewModel.loadMore();
-                        break;
+                if (msg.what == BaseAdapter.LOAD_MORE) {
+                    searchViewModel.loadMore();
                 }
                 return false;
             }
         });
-        final SearchAdapter searchAdapter = new SearchAdapter(handler);
+        final BaseAdapter searchAdapter = new BaseAdapter(handler);
         recyclerView.setAdapter(searchAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         searchViewModel.searchResult.observe(this, new Observer<ArrayList<Av>>() {
             @Override
             public void onChanged(ArrayList<Av> avs) {
-
-                switch (searchViewModel.getResponseStatus()) {
-                    case SearchViewModel.DATA_READY:
-                        loadFailed.setVisibility(View.GONE);
-                        loadingData.setVisibility(View.GONE);
-                        break;
-                    case SearchViewModel.RESPONSE_ERROR:
-                        Toast.makeText(requireContext(), "Failed!", Toast.LENGTH_SHORT).show();
-                        loadingData.setVisibility(View.GONE);
-                        loadFailed.setVisibility(View.VISIBLE);
-                        break;
-                    case SearchViewModel.NO_MORE:
-                        searchAdapter.setLoadFinish(true);
-                }
                 if (avs.size() > 0) {
-                    loadingData.setVisibility(View.GONE);
+                    dataStatusChange(LOAD_SUCCESS);
                 }
-                searchViewModel.setResponseStatus(0);
-                searchAdapter.submitList(new ArrayList<Av>(avs));
+                if (searchViewModel.isDataReady()) {
+                    searchAdapter.setLoadFinished(searchViewModel.isLoadFinished());
+                    if (!searchViewModel.isLoadSuccess()) {
+                        if (avs.size() == 0) {
+                            dataStatusChange(LOAD_FAILED);
+                        }
+                    }
+                }
+
+                searchAdapter.submitList(new ArrayList<>(avs));
+                searchViewModel.initStatus();
             }
         });
     }

@@ -3,28 +3,28 @@ package com.xujiacheng.avmooviewer.ui.detail;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.xujiacheng.avmooviewer.itembean.Av;
+import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.utils.Collections;
 import com.xujiacheng.avmooviewer.utils.Crawler;
-import com.xujiacheng.avmooviewer.utils.InternetRequest;
 import com.xujiacheng.avmooviewer.utils.RunningTask;
 
-public class DetailViewModel extends ViewModel {
+import java.util.Objects;
+
+public class DetailViewModel extends BaseViewModel {
     private static final String TAG = "DetailViewModel";
     public MutableLiveData<Av> av;
     boolean isDataReady = false;
     MutableLiveData<Boolean> isInCollection;
-    private final InternetRequest internetRequest;
+
 
     public DetailViewModel() {
         av = new MutableLiveData<>(new Av());
-        internetRequest = new InternetRequest();
         isInCollection = new MutableLiveData<>(false);
     }
 
-    public void loadAvInfo(final String url) {
+    void loadAvInfo(final String url) {
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
@@ -39,34 +39,39 @@ public class DetailViewModel extends ViewModel {
         });
     }
 
-    public void addToFavorite() {
-        if (!isInCollection.getValue()) {
+    void addToFavorite() {
+
+        if (!Objects.requireNonNull(isInCollection.getValue())) {
             RunningTask.addTask(new Runnable() {
                 @Override
                 public void run() {
-                    boolean b = Collections.addToCollection(av.getValue());
-                    checkCollections(av.getValue().url);
+                    Av value = av.getValue();
+                    if (value != null) {
+                        Collections.addToCollection(value);
+                        checkCollections(value.url);
+                    }
                 }
             });
         } else {
             RunningTask.addTask(new Runnable() {
                 @Override
                 public void run() {
-                    boolean b = Collections.removeCollection(av.getValue().url);
-                    checkCollections(av.getValue().url);
+                    Av value = av.getValue();
+                    if (value != null) {
+                        Collections.removeCollection(value.url);
+                        checkCollections(value.url);
+                    }
                 }
             });
         }
     }
 
-    public void checkCollections(final String url) {
+    void checkCollections(final String url) {
         Log.d(TAG, "checkCollections: url = " + url);
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
                 Av av = Collections.checkCollections(url);
-//                isDataReady = true;
-//                DetailViewModel.this.av.postValue(av);
                 if (av != null) {
                     isInCollection.postValue(true);
                 } else {

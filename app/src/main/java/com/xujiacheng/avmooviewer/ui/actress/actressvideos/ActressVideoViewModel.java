@@ -3,7 +3,6 @@ package com.xujiacheng.avmooviewer.ui.actress.actressvideos;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
@@ -15,27 +14,8 @@ import java.util.ArrayList;
 public class ActressVideoViewModel extends BaseViewModel {
     private static final String TAG = "ActressVideoViewModel";
     MutableLiveData<ArrayList<Av>> actressAv;
-    private String BASE_URL = "";
-    public static String actressURL;
+    static String actressURL;
     MutableLiveData<String> actressName;
-
-    public String getBASE_URL() {
-        return BASE_URL;
-    }
-
-    public void setBASE_URL(String url) {
-        this.BASE_URL = url + "/page/%s";
-    }
-
-    public boolean isDataReady() {
-        return isDataReady;
-    }
-
-    public void setDataReady(boolean dataReady) {
-        isDataReady = dataReady;
-    }
-
-    private boolean isDataReady = false;
 
 
     public ActressVideoViewModel() {
@@ -43,32 +23,34 @@ public class ActressVideoViewModel extends BaseViewModel {
         actressName = new MutableLiveData<>("");
     }
 
-    public void initActressVideos() {
+    void initActressVideos() {
         currentPage = 1;
         final String url = String.format(actressURL, currentPage);
-
-        Log.d(TAG, "initActressVideos: init actresses"+url);
+        Log.d(TAG, "initActressVideos: init actresses" + url);
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
                 String html = internetRequest.getHTML(url);
+                ArrayList<Av> avList = new ArrayList<>();
                 if (html != null) {
                     actressName.postValue(Crawler.getActressName(html));
-                    ArrayList<Av> avList = Crawler.getAvList(html);
-
+                    avList = Crawler.getAvList(html);
                     if (avList.size() > 0) {
-                        if (avList.size() < 30) {
-                            loadingFinished = true;
-                        }
-                        setDataReady(true);
-                        actressAv.postValue(avList);
+                        setLoadSuccess(true);
                     }
+                    if (avList.size() < 30) {
+                        setLoadFinished(true);
+                    }
+                } else {
+                    setLoadSuccess(false);
                 }
+                setDataReady(true);
+                actressAv.postValue(avList);
             }
         });
     }
 
-    public void loadMore() {
+    void loadMore() {
         currentPage++;
         final String url = String.format(actressURL, currentPage);
         RunningTask.addTask(new Runnable() {
@@ -78,13 +60,16 @@ public class ActressVideoViewModel extends BaseViewModel {
                 String html = internetRequest.getHTML(url);
                 if (html != null) {
                     ArrayList<Av> avList = Crawler.getAvList(html);
-                    if (avList.size() < 30) {
-                        loadingFinished = true;
+                    if (avList.size() > 0) {
+                        setLoadSuccess(true);
                     }
-                    setDataReady(true);
+                    if (avList.size() < 30) {
+                        setLoadFinished(true);
+                    }
+                    assert value != null;
                     value.addAll(avList);
-                    actressAv.postValue(avList);
                 }
+                setDataReady(true);
                 actressAv.postValue(value);
             }
         });
