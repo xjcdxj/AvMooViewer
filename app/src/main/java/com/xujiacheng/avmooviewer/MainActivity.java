@@ -30,34 +30,31 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //在外部存储沙盒内
         CollectionDir = getExternalFilesDir("Collections");
-        NavigationView navigationView = findViewById(R.id.navigation_view);
+        final NavigationView navigationView = findViewById(R.id.navigation_view);
         final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         mFragmentManager = getSupportFragmentManager();
-        final FragmentTransaction transaction = mFragmentManager.beginTransaction();
         //默认启动是主页，全部视频
-        transaction.replace(R.id.container, new AllAvFragment());
-        transaction.commit();
+        changeFragment(new AllAvFragment(), true);
+
         //左侧菜单导航到各个功能的fragment
         //这几个fragment作为顶级界面，不加入返回栈
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                drawerLayout.closeDrawers();
-                FragmentTransaction transaction = mFragmentManager.beginTransaction();
                 switch (menuItem.getItemId()) {
                     case R.id.menu_all_vids:
-                        transaction.replace(R.id.container, new AllAvFragment());
+                        changeFragment(new AllAvFragment(), true);
                         break;
                     case R.id.menu_actress:
-                        transaction.replace(R.id.container, new ActressFragment());
+                        changeFragment(new ActressFragment(), true);
                         break;
                     case R.id.menu_category:
                         break;
                     case R.id.menu_collections:
-                        transaction.replace(R.id.container, new CollectionsFragment());
+                        changeFragment(new CollectionsFragment(), true);
                 }
-                transaction.commit();
-                return false;
+                drawerLayout.closeDrawers();
+                return true;
             }
         });
     }
@@ -66,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         if (!isHomeView) {
             transaction.addToBackStack(null);
+            transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
         }
-        transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
         transaction.replace(R.id.container, destination);
         transaction.commit();
     }
