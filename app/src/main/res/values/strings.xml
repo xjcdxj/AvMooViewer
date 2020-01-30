@@ -15,4 +15,7 @@
     <string name="search_for">Search for:</string>
     <string name="home">Home</string>
     <string name="failed">Failed</string>
+    <string name="small_av_cover_image">small av cover image</string>
+    <string name="actress_header">Actress header</string>
+    <string name="big_av_cover_image">Big av cover image</string>
 </resources>

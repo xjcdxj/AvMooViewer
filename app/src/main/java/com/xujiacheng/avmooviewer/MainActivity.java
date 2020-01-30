@@ -14,7 +14,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.xujiacheng.avmooviewer.ui.actress.ActressFragment;
 import com.xujiacheng.avmooviewer.ui.allvideos.AllAvFragment;
 import com.xujiacheng.avmooviewer.ui.collections.CollectionsFragment;
-import com.xujiacheng.avmooviewer.utils.RunningTask;
 
 import java.io.File;
 
@@ -58,20 +57,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     public static void changeFragment(Fragment destination, boolean isHomeView) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         if (!isHomeView) {
             transaction.addToBackStack(null);
             transaction.setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left, R.anim.enter_from_left, R.anim.exit_to_right);
+        } else {
+            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
         }
         transaction.replace(R.id.container, destination);
         transaction.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        RunningTask.cleanAlltask();
     }
 }

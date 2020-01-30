@@ -20,6 +20,7 @@
             android:layout_margin="2dp"
 
             android:adjustViewBounds="true"
+            android:contentDescription="@string/actress_header"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/woman" />
 
@@ -29,8 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="4dp"
-            android:text="TextView"
-            android:textSize="14sp" />
+            android:textSize="@dimen/text_size_with_photo" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

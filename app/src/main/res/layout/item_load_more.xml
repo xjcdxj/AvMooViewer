@@ -22,6 +22,7 @@
         android:layout_height="0dp"
         android:gravity="center"
         android:text="@string/load_finished"
+        android:textSize="@dimen/text_size_with_photo"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/item_loading_loading"
         app:layout_constraintEnd_toEndOf="parent"

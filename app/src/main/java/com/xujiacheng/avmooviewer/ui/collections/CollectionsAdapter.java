@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -19,14 +21,23 @@ import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.ItemViewHolder> {
-
-    private MutableLiveData<ArrayList<Av>> mData;
+public class CollectionsAdapter extends ListAdapter<Av, CollectionsAdapter.ItemViewHolder> {
 
 
-    CollectionsAdapter(MutableLiveData<ArrayList<Av>> collections) {
-        this.mData = collections;
+    CollectionsAdapter() {
+        super(new DiffUtil.ItemCallback<Av>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
+                return oldItem == newItem;
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
+                return oldItem.url.equals(newItem.url);
+            }
+        });
     }
+
 
     @NonNull
     @Override
@@ -36,9 +47,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
         itemViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = Objects.requireNonNull(mData.getValue()).get(itemViewHolder.getAdapterPosition()).url;
-                MainActivity.changeFragment(new DetailFragment(url), false);
-
+                MainActivity.changeFragment(new DetailFragment(getItem(itemViewHolder.getAdapterPosition()).url), false);
             }
         });
         return itemViewHolder;
@@ -46,7 +55,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        Av av = Objects.requireNonNull(mData.getValue()).get(position);
+        Av av = getItem(position);
         holder.name.setText(av.name);
         Glide.with(holder.cover)
                 .asBitmap()
@@ -56,11 +65,6 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
     }
 
-    @Override
-    public int getItemCount() {
-
-        return Objects.requireNonNull(mData.getValue()).size();
-    }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
 

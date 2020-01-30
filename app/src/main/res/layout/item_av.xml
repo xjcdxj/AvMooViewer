@@ -23,6 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="125dp"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/small_av_cover_image"
             android:padding="2dp"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
@@ -38,8 +39,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
-            android:text="TextView"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_size_with_photo"
             app:layout_constraintBottom_toTopOf="@+id/item_av_id"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_av_cover"
@@ -50,7 +50,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="TextView"
             app:layout_constraintBottom_toBottomOf="@+id/item_av_cover"
             app:layout_constraintStart_toStartOf="@+id/guideline" />
 
@@ -59,7 +58,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="TextView"
             app:layout_constraintBottom_toBottomOf="@+id/item_av_cover"
             app:layout_constraintEnd_toEndOf="parent" />
 

@@ -43,20 +43,18 @@ public class CollectionsFragment extends Fragment {
         });
         CollectionsViewModel mViewModel = new ViewModelProvider(this).get(CollectionsViewModel.class);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        final CollectionsAdapter collectionsAdapter = new CollectionsAdapter(mViewModel.collections);
+        final CollectionsAdapter collectionsAdapter = new CollectionsAdapter();
         recyclerView.setAdapter(collectionsAdapter);
         mViewModel.collections.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {
             @Override
             public void onChanged(ArrayList<Av> avs) {
                 Log.d(TAG, "onChanged: collections size = " + avs.size());
-                collectionsAdapter.notifyDataSetChanged();
+                collectionsAdapter.submitList(new ArrayList<>(avs));
             }
         });
         mViewModel.getCollections();
         return view;
     }
-
-
 
 
 }
