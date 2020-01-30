@@ -2,6 +2,7 @@ package com.xujiacheng.avmooviewer;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.navigation.NavigationView;
 import com.xujiacheng.avmooviewer.ui.actress.ActressFragment;
@@ -27,13 +29,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MainActivityViewModel mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+
         //在外部存储沙盒内
         CollectionDir = getExternalFilesDir("Collections");
         final NavigationView navigationView = findViewById(R.id.navigation_view);
         final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         mFragmentManager = getSupportFragmentManager();
         //默认启动是主页，全部视频
-        changeFragment(new AllAvFragment(), true);
+        if (!mainActivityViewModel.isShown) {
+            changeFragment(new AllAvFragment(), true);
+            mainActivityViewModel.isShown = true;
+        }
+
 
         //左侧菜单导航到各个功能的fragment
         //这几个fragment作为顶级界面，不加入返回栈
@@ -57,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     public static void changeFragment(Fragment destination, boolean isHomeView) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         if (!isHomeView) {

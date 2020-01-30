@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,9 +16,6 @@ import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 public class CollectionsAdapter extends ListAdapter<Av, CollectionsAdapter.ItemViewHolder> {
 
