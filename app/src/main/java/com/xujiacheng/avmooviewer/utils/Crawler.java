@@ -1,8 +1,11 @@
 package com.xujiacheng.avmooviewer.utils;
 
 
+import android.util.Log;
+
 import com.xujiacheng.avmooviewer.itembean.Actor;
 import com.xujiacheng.avmooviewer.itembean.Av;
+import com.xujiacheng.avmooviewer.itembean.Category;
 import com.xujiacheng.avmooviewer.itembean.Info;
 
 import org.jsoup.Jsoup;
@@ -19,30 +22,29 @@ public class Crawler {
         ArrayList<Av> avArrayList = new ArrayList<>();
         Document document = Jsoup.parse(html);
         //document.querySelector("body > div.container-fluid > div.alert.alert-danger")
+        Element warning = document.select("body > div.container-fluid > div.alert.alert-danger").first();
+        if (warning != null) {
+            return avArrayList;
+        } else {
+            Elements movieBoxElements = document.select("#waterfall > div > a");
 
-//        if (danger != null || danger.size() > 0) {
-//            return avArrayList;
-//        }
-        // movieBox:  document.querySelector("#waterfall > div:nth-child(7) > a")
-        Elements movieBoxElements = document.select("#waterfall > div > a");
-
-        for (Element movieBoxElement : movieBoxElements) {
-            String url = movieBoxElement.attr("href");
-            String coverURL = movieBoxElement.select("div.photo-frame > img").attr("src");
-            String name = movieBoxElement.select("div.photo-frame > img").attr("title");
-            String id = movieBoxElement.select("div.photo-info > span > date:nth-child(2)").text();
-            String releaseDate = movieBoxElement.select("div.photo-info > span > date:nth-child(3)").text();
+            for (Element movieBoxElement : movieBoxElements) {
+                String url = movieBoxElement.attr("href");
+                String coverURL = movieBoxElement.select("div.photo-frame > img").attr("src");
+                String name = movieBoxElement.select("div.photo-frame > img").attr("title");
+                String id = movieBoxElement.select("div.photo-info > span > date:nth-child(2)").text();
+                String releaseDate = movieBoxElement.select("div.photo-info > span > date:nth-child(3)").text();
 //            Log.d(TAG, String.format("url = %s, name = %s, id = %s, date = %s.", coverURL, name, id, releaseDate));
-            Av av = new Av();
-            av.url = url;
-            av.name = name;
-            av.coverURL = coverURL;
-            av.id = id;
-            av.releaseDate = releaseDate;
-            avArrayList.add(av);
+                Av av = new Av();
+                av.url = url;
+                av.name = name;
+                av.coverURL = coverURL;
+                av.id = id;
+                av.releaseDate = releaseDate;
+                avArrayList.add(av);
+            }
+            return avArrayList;
         }
-        return avArrayList;
-
     }
 
     public static Av getAvInformation(String response) {
@@ -133,5 +135,21 @@ public class Crawler {
         Document document = Jsoup.parse(html);
         //document.querySelector("#waterfall > div:nth-child(1) > div")
         return document.select("#waterfall > div:nth-child(1) > div > div.photo-info > span").text();
+    }
+
+    public static ArrayList<Category> getCategoryList(String html) {
+        ArrayList<Category> categories = new ArrayList<>();
+        Document document = Jsoup.parse(html);
+        //document.querySelector("body > div.container-fluid.pt-10 > div:nth-child(2) > a:nth-child(1)")
+        Elements elements = document.select("body > div.container-fluid > div > a");
+
+        for (Element element : elements) {
+            String url = element.attr("href");
+
+            String name = element.text();
+
+            categories.add(new Category(name, url));
+        }
+        return categories;
     }
 }

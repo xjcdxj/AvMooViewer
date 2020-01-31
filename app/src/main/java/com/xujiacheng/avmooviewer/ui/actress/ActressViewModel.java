@@ -12,10 +12,19 @@ import java.util.ArrayList;
 public class ActressViewModel extends BaseViewModel {
     MutableLiveData<ArrayList<Actor>> actresses;
     private static final String ACTRESS_URL = "https://avmask.com/cn/actresses/page/%s";
-
     public ActressViewModel() {
         actresses = new MutableLiveData<>(new ArrayList<Actor>());
 
+    }
+
+    @Override
+    public String requestAvDataURL() {
+        return null;
+    }
+
+    @Override
+    public String loadMoreAvDataURL() {
+        return null;
     }
 
     void loadMoreActress() {

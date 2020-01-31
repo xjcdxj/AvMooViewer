@@ -7,8 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -17,39 +15,32 @@ import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
 
-public class CollectionsAdapter extends ListAdapter<Av, CollectionsAdapter.ItemViewHolder> {
-    CollectionsAdapter() {
-        super(new DiffUtil.ItemCallback<Av>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
-                return oldItem == newItem;
-            }
+import java.util.ArrayList;
 
-            @Override
-            public boolean areContentsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
-                return oldItem.url.equals(newItem.url);
-            }
-        });
+public class CollectionItemAdapter extends RecyclerView.Adapter<CollectionItemAdapter.CollectionItemViewHolder> {
+    private ArrayList<Av> mCollections;
+
+    public CollectionItemAdapter(ArrayList<Av> mCollections) {
+        this.mCollections = mCollections;
     }
-
 
     @NonNull
     @Override
-    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CollectionItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_collection, parent, false);
-        final ItemViewHolder itemViewHolder = new ItemViewHolder(view);
+        final CollectionItemViewHolder itemViewHolder = new CollectionItemViewHolder(view);
         itemViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.changeFragment(new DetailFragment(getItem(itemViewHolder.getAdapterPosition()).url), false);
+                MainActivity.changeFragment(new DetailFragment(mCollections.get(itemViewHolder.getAdapterPosition()).url), false);
             }
         });
         return itemViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ItemViewHolder holder, final int position) {
-        Av av = getItem(position);
+    public void onBindViewHolder(@NonNull CollectionItemViewHolder holder, int position) {
+        Av av = mCollections.get(position);
         holder.name.setText(av.name);
         Glide.with(holder.cover)
 //                .asBitmap()
@@ -59,11 +50,16 @@ public class CollectionsAdapter extends ListAdapter<Av, CollectionsAdapter.ItemV
                 .into(holder.cover);
     }
 
-    class ItemViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public int getItemCount() {
+        return mCollections.size();
+    }
+
+    public class CollectionItemViewHolder extends RecyclerView.ViewHolder {
         private final ImageView cover;
         private final TextView name;
 
-        ItemViewHolder(@NonNull View itemView) {
+        CollectionItemViewHolder(@NonNull View itemView) {
             super(itemView);
             cover = itemView.findViewById(R.id.item_collection_cover);
             name = itemView.findViewById(R.id.item_collection_name);

@@ -12,13 +12,13 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -70,12 +70,10 @@ public class DetailFragment extends Fragment {
         final TextView name = view.findViewById(R.id.item_detail_name);
         final TextView id = view.findViewById(R.id.item_detail_id);
         final TextView date = view.findViewById(R.id.item_detail_date);
-        final ProgressBar detailLoading = view.findViewById(R.id.detail_loading);
-        final ScrollView detailScroll = view.findViewById(R.id.detail_scroll_view);
+        final NestedScrollView detailScroll = view.findViewById(R.id.detail_scroll_view);
         final GridView actressGridView = view.findViewById(R.id.item_actresses_grid_view);
         final LinearLayout detailContainer = view.findViewById(R.id.detail_container);
         final MenuItem addToCollectionMenu = toolbar.getMenu().findItem(R.id.menu_favorite);
-        toolbar.setTitle(this.url);
         addToCollectionMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -87,8 +85,6 @@ public class DetailFragment extends Fragment {
                 return false;
             }
         });
-
-
         toolbar.setNavigationIcon(R.drawable.white_back);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,8 +107,6 @@ public class DetailFragment extends Fragment {
             @Override
             public void onChanged(Av av) {
                 if (mViewModel.isDataReady) {
-                    Log.d(TAG, "onChanged: big cover" + av.bigCoverURL);
-                    detailLoading.setVisibility(View.GONE);
                     detailScroll.setVisibility(View.VISIBLE);
                     Glide.with(DetailFragment.this)
                             .asBitmap()
@@ -137,7 +131,6 @@ public class DetailFragment extends Fragment {
                     name.setText(av.name);
                     toolbar.setTitle(av.name);
                     id.setText(av.id);
-                    toolbar.setSubtitle(av.id);
                     date.setText(av.releaseDate);
                     if (av.actors != null && av.actors.size() > 0) {
                         actressGridView.setAdapter(new ActressAdapter(av.actors));
@@ -153,6 +146,7 @@ public class DetailFragment extends Fragment {
                             Glide.with(DetailFragment.this)
                                     .asBitmap()
                                     .load(url)
+                                    .placeholder(R.drawable.avmooviewer)
                                     .into(imageView);
                             detailContainer.addView(imageView);
                         }
@@ -163,12 +157,7 @@ public class DetailFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
 
-        // TODO: Use the ViewModel
-    }
 
     //用于加载演员头像到gridView中
     class ActressAdapter extends BaseAdapter {
@@ -213,6 +202,17 @@ public class DetailFragment extends Fragment {
                         .load(getItem(position).imageURL)
                         .transition(withCrossFade())
                         .placeholder(R.drawable.woman)
+                        .listener(new RequestListener<Bitmap>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                return false;
+                            }
+                        })
                         .fitCenter()
                         .into(header);
                 TextView name = convertView.findViewById(R.id.item_actress_name);

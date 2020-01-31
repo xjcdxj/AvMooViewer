@@ -1,7 +1,5 @@
 package com.xujiacheng.avmooviewer.utils;
 
-import android.util.Log;
-
 import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.itembean.Av;
 
@@ -15,8 +13,6 @@ import java.util.ArrayList;
 
 public class Collections {
     private static final String TAG = "Collections";
-
-
     public static void addToCollection(Av av) {
         try {
             String[] strings = av.url.split("/");
@@ -24,7 +20,6 @@ public class Collections {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(file));
             objectOutputStream.writeObject(av);
             objectOutputStream.close();
-
         } catch (IOException ignored) {
         } finally {
             getExistingCollections();
@@ -35,14 +30,12 @@ public class Collections {
         ArrayList<Av> avs = new ArrayList<>();
         File[] files = MainActivity.CollectionDir.listFiles();
         if (files != null) {
-            Log.d(TAG, "getExistingCollections: collection size = " + files.length);
             for (File file : files) {
-                Log.d(TAG, "getExistingCollections: collection = " + file.toString());
                 try {
                     ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
                     Av av = (Av) objectInputStream.readObject();
+                    objectInputStream.close();
                     avs.add(av);
-
                 } catch (IOException | ClassNotFoundException ignored) {
                 }
             }
@@ -60,9 +53,7 @@ public class Collections {
         String[] strings = url.split("/");
         File file = new File(MainActivity.CollectionDir, strings[strings.length - 1]);
         boolean delete = file.delete();
-        if (delete) {
-            getExistingCollections();
-        }
+        getExistingCollections();
     }
 
     public static Av checkCollections(String url) {
@@ -71,7 +62,9 @@ public class Collections {
         if (file.exists()) {
             try {
                 ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
-                return (Av) objectInputStream.readObject();
+                Av av = (Av) objectInputStream.readObject();
+                objectInputStream.close();
+                return av;
             } catch (IOException | ClassNotFoundException e) {
                 return null;
             }

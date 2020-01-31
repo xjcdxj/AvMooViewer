@@ -13,65 +13,21 @@ import java.util.ArrayList;
 
 public class ActressVideoViewModel extends BaseViewModel {
     private static final String TAG = "ActressVideoViewModel";
-    MutableLiveData<ArrayList<Av>> actressAv;
-    static String actressURL;
+    static String mActressURL;
     MutableLiveData<String> actressName;
 
-
     public ActressVideoViewModel() {
-        actressAv = new MutableLiveData<>(new ArrayList<Av>());
         actressName = new MutableLiveData<>("");
     }
-
-    void initActressVideos() {
+    @Override
+    public String requestAvDataURL() {
         currentPage = 1;
-        final String url = String.format(actressURL, currentPage);
-        Log.d(TAG, "initActressVideos: init actresses" + url);
-        RunningTask.addTask(new Runnable() {
-            @Override
-            public void run() {
-                String html = internetRequest.getHTML(url);
-                ArrayList<Av> avList = new ArrayList<>();
-                if (html != null) {
-                    actressName.postValue(Crawler.getActressName(html));
-                    avList = Crawler.getAvList(html);
-                    if (avList.size() > 0) {
-                        setLoadSuccess(true);
-                    }
-                    if (avList.size() < 30) {
-                        setLoadFinished(true);
-                    }
-                } else {
-                    setLoadSuccess(false);
-                }
-                setDataReady(true);
-                actressAv.postValue(avList);
-            }
-        });
+        return String.format(mActressURL, currentPage);
     }
 
-    void loadMore() {
+    @Override
+    public String loadMoreAvDataURL() {
         currentPage++;
-        final String url = String.format(actressURL, currentPage);
-        RunningTask.addTask(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<Av> value = actressAv.getValue();
-                String html = internetRequest.getHTML(url);
-                if (html != null) {
-                    ArrayList<Av> avList = Crawler.getAvList(html);
-                    if (avList.size() > 0) {
-                        setLoadSuccess(true);
-                    }
-                    if (avList.size() < 30) {
-                        setLoadFinished(true);
-                    }
-                    assert value != null;
-                    value.addAll(avList);
-                }
-                setDataReady(true);
-                actressAv.postValue(value);
-            }
-        });
+        return String.format(mActressURL, currentPage);
     }
 }

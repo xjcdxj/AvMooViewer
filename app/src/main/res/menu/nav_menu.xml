@@ -11,7 +11,7 @@
             android:title="@string/all_vid" />
         <item
             android:id="@+id/menu_category"
-            android:title="@string/category" />
+            android:title="@string/categoryURL" />
         <item
             android:id="@+id/menu_actress"
             android:icon="@drawable/woman"

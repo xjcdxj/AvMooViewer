@@ -17,10 +17,8 @@
             android:id="@+id/item_collection_cover"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
             android:padding="4dp"
-            android:scaleType="fitCenter"
-            tools:srcCompat="@drawable/avmooviewer" />
+            android:scaleType="fitCenter" />
 
         <TextView
             android:id="@+id/item_collection_name"

@@ -24,6 +24,16 @@ public class DetailViewModel extends BaseViewModel {
         isInCollection = new MutableLiveData<>(false);
     }
 
+    @Override
+    public String requestAvDataURL() {
+        return null;
+    }
+
+    @Override
+    public String loadMoreAvDataURL() {
+        return null;
+    }
+
     void loadAvInfo(final String url) {
         RunningTask.addTask(new Runnable() {
             @Override
