@@ -10,9 +10,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class Collections {
-    private static final String TAG = "Collections";
+    private static ArrayList<Av> collections;
+//    private static final String TAG = "Collections";
+
+    public static ArrayList<Av> getCollections() {
+        if (collections == null) {
+            collections = getExistingCollections();
+        }
+        return collections;
+    }
+
     public static void addToCollection(Av av) {
         try {
             String[] strings = av.url.split("/");
@@ -22,15 +33,22 @@ public class Collections {
             objectOutputStream.close();
         } catch (IOException ignored) {
         } finally {
-            getExistingCollections();
+            collections = getExistingCollections();
         }
     }
 
-    public static ArrayList<Av> getExistingCollections() {
+    private static ArrayList<Av> getExistingCollections() {
         ArrayList<Av> avs = new ArrayList<>();
         File[] files = MainActivity.CollectionDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
+        if (files != null && files.length > 0) {
+            ArrayList<File> collectionFiles = new ArrayList<>(Arrays.asList(files));
+            java.util.Collections.sort(collectionFiles, new Comparator<File>() {
+                @Override
+                public int compare(File file, File newFile) {
+                    return Long.compare(newFile.lastModified(), file.lastModified());
+                }
+            });
+            for (File file : collectionFiles) {
                 try {
                     ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
                     Av av = (Av) objectInputStream.readObject();
@@ -39,36 +57,43 @@ public class Collections {
                 } catch (IOException | ClassNotFoundException ignored) {
                 }
             }
+
         }
         return avs;
 
     }
 
 
-    public Collections() {
+    private Collections() {
 
     }
 
-    public static void removeCollection(String url) {
+    public static boolean removeCollection(String url) {
         String[] strings = url.split("/");
         File file = new File(MainActivity.CollectionDir, strings[strings.length - 1]);
         boolean delete = file.delete();
-        getExistingCollections();
+        collections = getExistingCollections();
+        return delete;
     }
 
-    public static Av checkCollections(String url) {
-        String[] strings = url.split("/");
-        File file = new File(MainActivity.CollectionDir, strings[strings.length - 1]);
-        if (file.exists()) {
-            try {
-                ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
-                Av av = (Av) objectInputStream.readObject();
-                objectInputStream.close();
-                return av;
-            } catch (IOException | ClassNotFoundException e) {
-                return null;
+    public static boolean checkCollections(String url) {
+        for (Av av : getCollections()) {
+            if (av.url.equals(url)) {
+                return true;
             }
         }
-        return null;
+        return false;
+//        File file = new File(MainActivity.CollectionDir, strings[strings.length - 1]);
+//        if (file.exists()) {
+//            try {
+//                ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(file));
+//                Av av = (Av) objectInputStream.readObject();
+//                objectInputStream.close();
+//                return av;
+//            } catch (IOException | ClassNotFoundException e) {
+//                return null;
+//            }
+//        }
+//        return null;
     }
 }

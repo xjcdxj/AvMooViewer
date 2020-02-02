@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class CollectionItemAdapter extends RecyclerView.Adapter<CollectionItemAdapter.CollectionItemViewHolder> {
     private ArrayList<Av> mCollections;
 
-    public CollectionItemAdapter(ArrayList<Av> mCollections) {
+    CollectionItemAdapter(ArrayList<Av> mCollections) {
         this.mCollections = mCollections;
     }
 
@@ -55,7 +55,7 @@ public class CollectionItemAdapter extends RecyclerView.Adapter<CollectionItemAd
         return mCollections.size();
     }
 
-    public class CollectionItemViewHolder extends RecyclerView.ViewHolder {
+    class CollectionItemViewHolder extends RecyclerView.ViewHolder {
         private final ImageView cover;
         private final TextView name;
 

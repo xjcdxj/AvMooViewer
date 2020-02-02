@@ -1,18 +1,18 @@
 package com.xujiacheng.avmooviewer.ui.category;
 
-import android.util.Log;
-
 import androidx.lifecycle.ViewModelProvider;
 
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
+
+import java.util.Objects;
 
 public class CategoryFragment extends ShowAvsBaseFragment {
     private String categoryURL;
     private String categoryName;
 
 
-    private static final String TAG = "CategoryFragment";
+//    private static final String TAG = "CategoryFragment";
     private CategoryViewModel mViewModel;
 
     public CategoryFragment(String categoryURL, String categoryName) {
@@ -35,22 +35,31 @@ public class CategoryFragment extends ShowAvsBaseFragment {
         if (categoryName != null) {
             mToolbar.setTitle(categoryName);
         }
-
-        if (mViewModel.getUrl() == null) {
-            mViewModel.setUrl(this.categoryURL);
-            mViewModel.requestAvData();
-        }
-        if (!mViewModel.getUrl().equals(this.categoryURL)) {
+        if (mViewModel.getUrl()==null
+                ||!mViewModel.getUrl().equals(this.categoryURL)
+                || Objects.requireNonNull(mViewModel.mAvListData.getValue()).size()==0){
             mViewModel.setUrl(this.categoryURL);
             refreshData();
-        } else {
-            if (mViewModel.mAvLiveData.getValue().size() == 0) {
-                refreshData();
-            } else {
-                mViewModel.setDataReady(true);
-                mViewModel.setLoadSuccess(true);
-            }
+        }else {
+            mViewModel.setLoadSuccess(true);
+            mViewModel.setDataReady(true);
         }
+
+//        if (mViewModel.getUrl() == null) {
+//            mViewModel.setUrl(this.categoryURL);
+//            mViewModel.refreshAvData();
+//        }
+//        if (!mViewModel.getUrl().equals(this.categoryURL)) {
+//            mViewModel.setUrl(this.categoryURL);
+//            refreshData();
+//        } else {
+//            if (mViewModel.mAvListData.getValue().size() == 0) {
+//                refreshData();
+//            } else {
+//                mViewModel.setDataReady(true);
+//                mViewModel.setLoadSuccess(true);
+//            }
+//        }
     }
 
     @Override

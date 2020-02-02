@@ -68,7 +68,7 @@ public class DetailViewModel extends BaseViewModel {
                 public void run() {
                     Av value = av.getValue();
                     if (value != null) {
-                        Collections.removeCollection(value.url);
+                        boolean b = Collections.removeCollection(value.url);
                         checkCollections(value.url);
                     }
                 }
@@ -81,12 +81,7 @@ public class DetailViewModel extends BaseViewModel {
         RunningTask.addTask(new Runnable() {
             @Override
             public void run() {
-                Av av = Collections.checkCollections(url);
-                if (av != null) {
-                    isInCollection.postValue(true);
-                } else {
-                    isInCollection.postValue(false);
-                }
+                isInCollection.postValue(Collections.checkCollections(url));
             }
         });
     }

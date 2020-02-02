@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Observer;
@@ -19,12 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Category;
-import com.xujiacheng.avmooviewer.itembean.Info;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 import com.xujiacheng.avmooviewer.ui.category.CategoryFragment;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class ShowCategoryFragment extends ShowAvsBaseFragment {
@@ -62,10 +61,9 @@ public class ShowCategoryFragment extends ShowAvsBaseFragment {
                 }
             }
         });
-        if (mViewModel.mCategoryList.getValue().size() == 0) {
+        if (Objects.requireNonNull(mViewModel.mCategoryList.getValue()).size() == 0) {
             mViewModel.getCategoryData();
         }
-
     }
 
     @Override
@@ -76,7 +74,7 @@ public class ShowCategoryFragment extends ShowAvsBaseFragment {
     class CategoryAdapter extends ListAdapter<Category, CategoryAdapter.CategoryViewHolder> {
 
 
-        protected CategoryAdapter() {
+        CategoryAdapter() {
             super(new DiffUtil.ItemCallback<Category>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull Category oldItem, @NonNull Category newItem) {
@@ -108,20 +106,20 @@ public class ShowCategoryFragment extends ShowAvsBaseFragment {
 
         @Override
         public void onBindViewHolder(@NonNull CategoryAdapter.CategoryViewHolder holder, int position) {
-            Category category = mViewModel.mCategoryList.getValue().get(position);
+            Category category = Objects.requireNonNull(mViewModel.mCategoryList.getValue()).get(position);
             holder.categoryName.setText(category.name);
         }
 
         @Override
         public int getItemCount() {
-            return mViewModel.mCategoryList.getValue().size();
+            return Objects.requireNonNull(mViewModel.mCategoryList.getValue()).size();
         }
 
-        public class CategoryViewHolder extends RecyclerView.ViewHolder {
+        class CategoryViewHolder extends RecyclerView.ViewHolder {
 
             private final TextView categoryName;
 
-            public CategoryViewHolder(@NonNull View itemView) {
+            CategoryViewHolder(@NonNull View itemView) {
                 super(itemView);
                 categoryName = itemView.findViewById(R.id.item_category_name);
             }

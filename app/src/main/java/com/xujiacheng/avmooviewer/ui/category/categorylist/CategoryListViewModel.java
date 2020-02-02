@@ -5,7 +5,6 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Category;
 import com.xujiacheng.avmooviewer.utils.Crawler;
 import com.xujiacheng.avmooviewer.utils.InternetRequest;

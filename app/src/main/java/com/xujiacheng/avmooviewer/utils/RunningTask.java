@@ -11,7 +11,5 @@ public class RunningTask {
         }
         THREAD_POOL.submit(task);
     }
-    public static void cleanAlltask(){
-        THREAD_POOL.shutdownNow();
-    }
+
 }

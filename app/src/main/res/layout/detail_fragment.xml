@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|snap"
+            app:layout_scrollFlags="scroll|enterAlwaysCollapsed|enterAlways"
 
             app:toolbarId="@+id/detail_toolbar">
 
@@ -37,7 +37,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:srcCompat="@drawable/avmooviewer" />
+                    app:srcCompat="@drawable/avmooviewer" />
 
                 <ProgressBar
                     android:id="@+id/item_detail_cover_loading"

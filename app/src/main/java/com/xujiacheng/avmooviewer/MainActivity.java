@@ -1,18 +1,10 @@
 package com.xujiacheng.avmooviewer;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
-import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -22,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.navigation.NavigationView;
 import com.xujiacheng.avmooviewer.ui.actress.ActressFragment;
 import com.xujiacheng.avmooviewer.ui.allvideos.AllAvFragment;
-import com.xujiacheng.avmooviewer.ui.category.CategoryFragment;
 import com.xujiacheng.avmooviewer.ui.category.categorylist.ShowCategoryFragment;
 import com.xujiacheng.avmooviewer.ui.collections.CollectionsFragment;
 
@@ -49,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         if (!mainActivityViewModel.isShown) {
             changeFragment(new AllAvFragment(), true);
             mainActivityViewModel.isShown = true;
+            navigationView.setCheckedItem(R.id.menu_all_vids);
         }
 
 
@@ -69,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.menu_collections:
                         changeFragment(new CollectionsFragment(), true);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + menuItem.getItemId());
                 }
                 drawerLayout.closeDrawers();
                 return true;

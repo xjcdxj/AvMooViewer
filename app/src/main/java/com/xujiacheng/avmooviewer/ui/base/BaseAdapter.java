@@ -1,14 +1,10 @@
 package com.xujiacheng.avmooviewer.ui.base;
 
-import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,46 +21,26 @@ import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
 
-public class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
-    private static final String TAG = "BaseAdapter";
+public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
+//    private static final String TAG = "BaseAdapter";
     private static final int LOADING = 0;
     private static final int NORMAL = 1;
-    public static final int LOAD_MORE = 3;
-    private boolean isLoadFinished = false;
-    private boolean isLoadSuccess = true;
-
-    private boolean isLoadSuccess() {
-        return isLoadSuccess;
-    }
-
-    public void setLoadSuccess(boolean loadSuccess) {
-        isLoadSuccess = loadSuccess;
-    }
-
-    private boolean isLoadFinished() {
-        return isLoadFinished;
-    }
-
-    public void setLoadFinished(boolean loadFinished) {
-        this.isLoadFinished = loadFinished;
-    }
+//    public static final int LOAD_MORE = 3;
 
 
-    private Handler mHandler;
-
-    public BaseAdapter(Handler handler) {
+    BaseAdapter() {
         super(new DiffUtil.ItemCallback<Av>() {
             @Override
             public boolean areItemsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
-                return oldItem == newItem;
+                return oldItem.url.equals(newItem.url);
             }
 
             @Override
             public boolean areContentsTheSame(@NonNull Av oldItem, @NonNull Av newItem) {
-                return oldItem.url.equals(newItem.url);
+                return oldItem.coverURL.equals(newItem.coverURL)
+                        && oldItem.name.equals(newItem.name);
             }
         });
-        this.mHandler = handler;
     }
 
 
@@ -80,6 +56,11 @@ public class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
                 @Override
                 public void onClick(View v) {
                     //导航到点击的视频的详情页
+//                    AnimationSet animationSet = new AnimationSet(true);
+//                    animationSet.addAnimation(new ScaleAnimation(1F, 1F, 1F, 2F));
+//                    animationSet.setDuration(500);
+//                    animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+//                    avItemViewHolder.itemView.startAnimation(animationSet);
                     MainActivity.changeFragment(new DetailFragment(getItem(avItemViewHolder.getAdapterPosition()).url), false);
 
                 }
@@ -92,60 +73,29 @@ public class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
         return avItemViewHolder;
     }
 
+    public abstract void loadingProcess(AvItemViewHolder holder);
 
     @Override
     public void onBindViewHolder(@NonNull final AvItemViewHolder holder, final int position) {
         if (position == getItemCount() - 1) {
-            if (mHandler == null) {
-                holder.itemView.setVisibility(View.GONE);
-
-
-            } else {
-                if (isLoadSuccess()) {
-                    if (isLoadFinished()) {
-                        holder.loading.setVisibility(View.GONE);
-                        holder.loadFinish.setText(R.string.load_finished);
-                        holder.loadFinish.setVisibility(View.VISIBLE);
-                    } else {
-                        mHandler.sendEmptyMessage(LOAD_MORE);
-                    }
-                } else {
-                    holder.loading.setVisibility(View.GONE);
-                    holder.loadFinish.setText(R.string.load_failed);
-                    holder.loadFinish.setVisibility(View.VISIBLE);
-                }
-                Log.d(TAG, "onBindViewHolder: last " + isLoadSuccess());
-
-            }
+            loadingProcess(holder);
         } else {
             AnimationSet animationSet = new AnimationSet(true);
-            animationSet.addAnimation(new AlphaAnimation(0F, 1F));
-            animationSet.setDuration(150);
+            animationSet.addAnimation(new TranslateAnimation(0F, 0F, 50F, 0F));
+//            animationSet.addAnimation(new ScaleAnimation(0.5F,1F,1F,1F));
+            animationSet.setDuration(500);
+            animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
             holder.itemView.startAnimation(animationSet);
-            animationSet.setAnimationListener(
-                    new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                            Av item = getItem(position);
-                            holder.id.setText(item.id);
-                            holder.name.setText(item.name);
-                            holder.releaseDate.setText(item.releaseDate);
-                            Glide.with(holder.cover)
-                                    .load(item.coverURL)
-                                    .into(holder.cover);
-                        }
+            Av item = getItem(position);
+            holder.id.setText(item.id);
+            holder.name.setText(item.name);
+            holder.releaseDate.setText(item.releaseDate);
+            Glide.with(holder.cover)
+                    .load(item.coverURL)
+                    .placeholder(R.drawable.ic_image_black_24dp)
+                    .error(R.drawable.ic_broken_image_black_24dp)
+                    .into(holder.cover);
 
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-
-                        }
-                    }
-            );
         }
 
 
@@ -173,8 +123,33 @@ public class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
         private final TextView name;
         private final TextView id;
         private final TextView releaseDate;
-        private final ProgressBar loading;
-        private final TextView loadFinish;
+        final ProgressBar loading;
+        final TextView loadFinish;
+        static final int LOADING = 0;
+        static final int FINISH = 1;
+        static final int FAILED = 2;
+
+
+        void setLoadStatus(int status) {
+            switch (status) {
+                case LOADING:
+                    loading.setVisibility(View.VISIBLE);
+                    loadFinish.setVisibility(View.GONE);
+                    break;
+                case FINISH:
+                    loadFinish.setText(R.string.load_finished);
+                    loadFinish.setVisibility(View.VISIBLE);
+                    loading.setVisibility(View.GONE);
+                    break;
+                case FAILED:
+                    loading.setVisibility(View.GONE);
+                    loadFinish.setText(R.string.load_failed_click_to_retry);
+                    loadFinish.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + status);
+            }
+        }
 
         AvItemViewHolder(@NonNull View itemView) {
             super(itemView);

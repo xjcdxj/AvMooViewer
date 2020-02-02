@@ -47,7 +47,6 @@ public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder
     }
 
 
-
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -56,7 +55,8 @@ public class ActressAdapter extends ListAdapter<Actor, ActressAdapter.ViewHolder
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.changeFragment(new ActressesVideosFragment(getItem(viewHolder.getAdapterPosition()).url), false);
+                Actor actor = getItem(viewHolder.getAdapterPosition());
+                MainActivity.changeFragment(new ActressesVideosFragment(actor.url, actor.name), false);
 //                Message message = new Message();
 //                message.what = ActressFragment.ITEM_CLICK;
 //                message.obj = getItem(viewHolder.getAdapterPosition()).url;

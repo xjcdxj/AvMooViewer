@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -32,20 +32,20 @@ import java.util.ArrayList;
 
 //显示视频列表的fragment抽象类，已经提取出了一些控件供使用
 public abstract class ShowAvsBaseFragment extends Fragment {
-    private static final String TAG = "ShowAvsBaseFragment";
+//    private static final String TAG = "ShowAvsBaseFragment";
 
-    public static final int REFRESH_DATA = 0;
+    private static final int REFRESH_DATA = 0;
     public static final int LOAD_SUCCESS = 1;
     public static final int LOAD_FAILED = 2;
-    public static final int NO_RESULT = 3;
+    private static final int NO_RESULT = 3;
     protected Toolbar mToolbar;
     protected RecyclerView mRecyclerView;
     private ProgressBar loadingData;
-    protected TextView loadFailed;
+    private TextView loadFailed;
     private DrawerLayout drawerLayout;
     protected SwipeRefreshLayout mSwipeRefreshLayout;
-    protected AvItemAdapter mAvAdapter;
     private BaseViewModel mBaseViewModel;
+    private BaseAdapter baseAdapter;
 
 
     public ShowAvsBaseFragment() {
@@ -73,26 +73,41 @@ public abstract class ShowAvsBaseFragment extends Fragment {
 
 
         if (useDefaultConfig()) {
-            defaulConfiguration();
+            defaultConfiguration();
         }
         uiOperation();
         return view;
     }
 
-    private void defaulConfiguration() {
+    private void defaultConfiguration() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        mAvAdapter = new AvItemAdapter(mBaseViewModel.showAvItems) {
+        baseAdapter = new BaseAdapter() {
             @Override
-            public boolean loadMoreData() {
+            public void loadingProcess(final AvItemViewHolder holder) {
+                holder.itemView.setClickable(false);
                 if (mBaseViewModel.isLoadFinished()) {
-                    return true;
+                    holder.setLoadStatus(AvItemViewHolder.FINISH);
                 } else {
-                    mBaseViewModel.loadMoreAvData();
-                    return false;
+                    if (mBaseViewModel.isLoadSuccess()) {
+
+                        holder.setLoadStatus(AvItemViewHolder.LOADING);
+                        mBaseViewModel.loadMoreAvData();
+                    } else {
+                        holder.itemView.setClickable(true);
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mBaseViewModel.loadMoreAvData();
+                                holder.loading.setVisibility(View.VISIBLE);
+                                holder.loadFinish.setVisibility(View.GONE);
+                            }
+                        });
+                        holder.setLoadStatus(AvItemViewHolder.FAILED);
+                    }
                 }
             }
         };
-        mRecyclerView.setAdapter(mAvAdapter);
+        mRecyclerView.setAdapter(baseAdapter);
         //下拉刷新
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -101,42 +116,31 @@ public abstract class ShowAvsBaseFragment extends Fragment {
             }
         });
 
-        mBaseViewModel.mAvLiveData.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {
+        mBaseViewModel.mAvListData.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {
             @Override
             public void onChanged(ArrayList<Av> avs) {
+                if (avs.size() == 0) {
+                    mSwipeRefreshLayout.setVisibility(View.GONE);
+                    dataStatusChange(REFRESH_DATA);
+                } else {
+                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                    dataStatusChange(LOAD_SUCCESS);
+                }
                 if (mBaseViewModel.isDataReady()) {
-                    //只要数据大于0，就表明加载成功了
-                    if (avs.size() > 0) {
-                        dataStatusChange(LOAD_SUCCESS);
-                        if (mBaseViewModel.isDataReady()) {
-                            if (mBaseViewModel.isLoadSuccess()) {//数据大于0，数据准备好了，而且也没有获取失败，就提交数据
-                                int positionStart = mBaseViewModel.showAvItems.size() - 1;
-                                if (positionStart < 0) {
-                                    positionStart = 0;
-                                }
-                                int itemCount = avs.size() - mBaseViewModel.showAvItems.size();
-//                                mBaseViewModel.showAvItems.clear();
-                                for (int i = positionStart; i < avs.size(); i++) {
-                                    mBaseViewModel.showAvItems.add(avs.get(i));
-                                }
-//                                mBaseViewModel.showAvItems.addAll(avs);
-                                mAvAdapter.notifyItemRangeInserted(positionStart, itemCount);
-
-                            }
-                        }
+                    if (mBaseViewModel.isLoadSuccess()) {
+                        baseAdapter.submitList(new ArrayList<>(avs));
                     } else {
-                        //数据等于0，判断获取成功与否，分别改变界面
-                        if (mBaseViewModel.isLoadSuccess()) {
-                            dataStatusChange(NO_RESULT);
-                        } else {
+                        if (avs.size() == 0) {
                             dataStatusChange(LOAD_FAILED);
+                        } else {
+                            baseAdapter.notifyItemChanged(baseAdapter.getItemCount() - 1);
                         }
                     }
                 }
-                mBaseViewModel.initStatus();
             }
         });
     }
+
 
     public abstract BaseViewModel setViewModel();    //返回true表示作为顶级界面，false表示是子界面，对左上角导航菜单做修改
 
@@ -146,12 +150,13 @@ public abstract class ShowAvsBaseFragment extends Fragment {
 
     //刷新界面数据
     protected void refreshData() {
-        mSwipeRefreshLayout.setVisibility(View.GONE);
-        dataStatusChange(REFRESH_DATA);
-        if (mBaseViewModel != null && mAvAdapter != null) {
-            mBaseViewModel.showAvItems.clear();
-            mAvAdapter.notifyDataSetChanged();
-            mBaseViewModel.requestAvData();
+//        mSwipeRefreshLayout.setVisibility(View.GONE);
+
+        if (mBaseViewModel != null && baseAdapter != null) {
+//            mBaseViewModel.showAvItems.clear();
+//            mAvAdapter.notifyDataSetChanged();
+            mBaseViewModel.mAvListData.setValue(new ArrayList<Av>());
+            mBaseViewModel.refreshAvData();
         }
     }
 
@@ -169,12 +174,11 @@ public abstract class ShowAvsBaseFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.recycler_view);
         drawerLayout = requireActivity().findViewById(R.id.drawer_layout);
         loadingData = view.findViewById(R.id.all_vid_loading);
-        CoordinatorLayout rootLayout = view.findViewById(R.id.coordinatorLayout2);
+        ConstraintLayout rootLayout = view.findViewById(R.id.base_root_view);
         rootLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 closeKeyBoard();
-
                 return false;
             }
         });
@@ -220,9 +224,13 @@ public abstract class ShowAvsBaseFragment extends Fragment {
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 break;
             case NO_RESULT:
-                loadFailed.setText("No Result");
+
+                loadFailed.setText(R.string.no_result);
                 loadingData.setVisibility(View.GONE);
                 loadFailed.setVisibility(View.VISIBLE);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + status);
         }
     }
 
@@ -235,9 +243,6 @@ public abstract class ShowAvsBaseFragment extends Fragment {
             if (imm != null) {
                 imm.hideSoftInputFromWindow(requireView().getWindowToken(), 0);
             }
-//                    }
-//                    Toast.makeText(requireContext(), "Cancel search", Toast.LENGTH_SHORT).show();
-
         }
     }
 

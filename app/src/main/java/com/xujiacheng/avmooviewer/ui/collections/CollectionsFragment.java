@@ -29,10 +29,10 @@ public class CollectionsFragment extends ShowAvsBaseFragment {
     @Override
     public void uiOperation() {
         dataStatusChange(LOAD_SUCCESS);
+        mSwipeRefreshLayout.setEnabled(false);
         mToolbar.setTitle(getString(R.string.collections));
         CollectionsViewModel mViewModel = new ViewModelProvider(requireActivity()).get(CollectionsViewModel.class);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        final CollectionsAdapter collectionsAdapter = new CollectionsAdapter();
         final CollectionItemAdapter collectionItemAdapter = new CollectionItemAdapter(mViewModel.showCollections);
         mRecyclerView.setAdapter(collectionItemAdapter);
         mViewModel.collections.observe(getViewLifecycleOwner(), new Observer<ArrayList<Av>>() {

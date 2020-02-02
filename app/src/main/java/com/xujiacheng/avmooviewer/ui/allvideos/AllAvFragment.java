@@ -1,33 +1,28 @@
 package com.xujiacheng.avmooviewer.ui.allvideos;
 
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
-import com.xujiacheng.avmooviewer.itembean.Av;
-import com.xujiacheng.avmooviewer.ui.base.AvItemAdapter;
-import com.xujiacheng.avmooviewer.ui.base.BaseAdapter;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 import com.xujiacheng.avmooviewer.ui.search.SearchFragment;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class AllAvFragment extends ShowAvsBaseFragment {
     private static final String TAG = "AllAvFragment";
     private AllVideoViewModel mViewModel;
+
+    public AllAvFragment() {
+
+    }
 
     @Override
     public boolean isHomeFragment() {
@@ -46,7 +41,6 @@ public class AllAvFragment extends ShowAvsBaseFragment {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 closeKeyBoard();
-
                 return false;
             }
         });
@@ -70,13 +64,17 @@ public class AllAvFragment extends ShowAvsBaseFragment {
                 mSearchView.onActionViewCollapsed();
                 return false;
             }
+
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
             }
         });
-        if (Objects.requireNonNull(this.mViewModel.mAvLiveData.getValue()).size() == 0) {
+        if (Objects.requireNonNull(this.mViewModel.mAvListData.getValue()).size() == 0) {
             refreshData();
+        } else {
+            mViewModel.setDataReady(true);
+            mViewModel.setLoadSuccess(true);
         }
     }
 
@@ -86,5 +84,10 @@ public class AllAvFragment extends ShowAvsBaseFragment {
         return mViewModel;
     }
 
+    @Override
+    public void onStop() {
 
+        super.onStop();
+        closeKeyBoard();
+    }
 }

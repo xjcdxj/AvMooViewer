@@ -11,6 +11,8 @@ package com.xujiacheng.avmooviewer.itembean;
 其他
  */
 public class Category extends Info {
+    private static final long serialVersionUID = -9071156318964146280L;
+
     public Category(String name, String url) {
         super(name, url);
     }

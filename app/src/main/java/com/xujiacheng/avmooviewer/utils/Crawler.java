@@ -1,8 +1,6 @@
 package com.xujiacheng.avmooviewer.utils;
 
 
-import android.util.Log;
-
 import com.xujiacheng.avmooviewer.itembean.Actor;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.itembean.Category;
@@ -122,20 +120,7 @@ public class Crawler {
         return actors;
     }
 
-    public static String getActressNextPage(String html) {
 
-        Document document = Jsoup.parse(html);
-        //document.querySelector("body > div:nth-child(6) > ul > li:nth-child(11) > a")
-        //document.querySelector("#waterfall > div:nth-child(1) > div > div.photo-info > span")
-        Elements select = document.select("");
-        return null;
-    }
-
-    public static String getActressName(String html) {
-        Document document = Jsoup.parse(html);
-        //document.querySelector("#waterfall > div:nth-child(1) > div")
-        return document.select("#waterfall > div:nth-child(1) > div > div.photo-info > span").text();
-    }
 
     public static ArrayList<Category> getCategoryList(String html) {
         ArrayList<Category> categories = new ArrayList<>();

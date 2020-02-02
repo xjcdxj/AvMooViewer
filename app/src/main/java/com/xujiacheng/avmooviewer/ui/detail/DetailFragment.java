@@ -56,7 +56,7 @@ public class DetailFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
         mViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
@@ -108,10 +108,15 @@ public class DetailFragment extends Fragment {
             public void onChanged(Av av) {
                 if (mViewModel.isDataReady) {
                     detailScroll.setVisibility(View.VISIBLE);
+                    final int height = cover.getHeight();
+                    Log.d(TAG, "onChanged: height = " + height);
+                    final int width = cover.getWidth();
+                    Log.d(TAG, "onChanged: width = " + width);
+
                     Glide.with(DetailFragment.this)
                             .asBitmap()
                             .load(av.bigCoverURL)
-                            .placeholder(R.drawable.avmooviewer)
+//                            .placeholder(R.drawable.avmooviewer)
 
                             .listener(new RequestListener<Bitmap>() {
                                 @Override
@@ -121,9 +126,11 @@ public class DetailFragment extends Fragment {
                                 }
 
                                 @Override
-                                public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                                public boolean onResourceReady(final Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+
                                     coverLoading.setVisibility(View.GONE);
                                     return false;
+
                                 }
                             })
                             .into(cover);
@@ -139,7 +146,7 @@ public class DetailFragment extends Fragment {
                     }
                     if (av.previewURL != null && av.previewURL.size() > 0) {
                         for (String url : av.previewURL) {
-                            ImageView imageView = new ImageView(requireContext());
+                            final ImageView imageView = new ImageView(requireContext());
                             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             imageView.setPadding(4, 4, 4, 4);
                             imageView.setAdjustViewBounds(true);
@@ -156,7 +163,6 @@ public class DetailFragment extends Fragment {
         });
         return view;
     }
-
 
 
     //用于加载演员头像到gridView中
@@ -192,11 +198,12 @@ public class DetailFragment extends Fragment {
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        MainActivity.changeFragment(new ActressesVideosFragment(getItem(position).url), false);
+                        Info item = getItem(position);
+                        MainActivity.changeFragment(new ActressesVideosFragment(item.url, item.name), false);
                     }
                 });
 
-                ImageView header = convertView.findViewById(R.id.item_actress_header);
+                final ImageView header = convertView.findViewById(R.id.item_actress_header);
                 Glide.with(DetailFragment.this)
                         .asBitmap()
                         .load(getItem(position).imageURL)
@@ -210,6 +217,7 @@ public class DetailFragment extends Fragment {
 
                             @Override
                             public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+
                                 return false;
                             }
                         })
@@ -223,5 +231,6 @@ public class DetailFragment extends Fragment {
 
 
     }
+
 
 }

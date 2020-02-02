@@ -13,7 +13,7 @@ public class InternetRequest {
     private static OkHttpClient okHttpClient;
     private static InternetRequest INSTANCE;
 
-    public InternetRequest() {
+    private InternetRequest() {
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient.Builder()
                     .connectTimeout(10000, TimeUnit.MILLISECONDS)

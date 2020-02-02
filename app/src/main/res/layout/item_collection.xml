@@ -17,6 +17,7 @@
             android:id="@+id/item_collection_cover"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             android:padding="4dp"
             android:scaleType="fitCenter" />
 
@@ -26,6 +27,6 @@
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="TextView"
-            android:textSize="18sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

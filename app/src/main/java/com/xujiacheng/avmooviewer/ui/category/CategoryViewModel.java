@@ -1,7 +1,5 @@
 package com.xujiacheng.avmooviewer.ui.category;
 
-import androidx.lifecycle.ViewModel;
-
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 
 /*
