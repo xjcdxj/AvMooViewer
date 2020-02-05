@@ -1,7 +1,10 @@
 package com.xujiacheng.avmooviewer;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,21 +18,26 @@ import com.google.android.material.navigation.NavigationView;
 import com.xujiacheng.avmooviewer.ui.actress.ActressFragment;
 import com.xujiacheng.avmooviewer.ui.allvideos.AllAvFragment;
 import com.xujiacheng.avmooviewer.ui.category.categorylist.ShowCategoryFragment;
+import com.xujiacheng.avmooviewer.ui.category.categorylist.ViewPagerCategoryFragment;
 import com.xujiacheng.avmooviewer.ui.collections.CollectionsFragment;
 
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     //收藏视频的文件保存地址
     public static File CollectionDir;
     private static FragmentManager mFragmentManager;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         MainActivityViewModel mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        linearLayout = findViewById(R.id.container);
 
         //在外部存储沙盒内
         CollectionDir = getExternalFilesDir("Collections");
@@ -40,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         if (!mainActivityViewModel.isShown) {
             changeFragment(new AllAvFragment(), true);
             mainActivityViewModel.isShown = true;
-            navigationView.setCheckedItem(R.id.menu_all_vids);
+            navigationView.setCheckedItem(R.id.menu_home);
         }
 
 
@@ -50,18 +58,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.menu_all_vids:
+                    case R.id.menu_home:
                         changeFragment(new AllAvFragment(), true);
                         break;
                     case R.id.menu_actress:
                         changeFragment(new ActressFragment(), true);
                         break;
                     case R.id.menu_category:
-                        changeFragment(new ShowCategoryFragment(), true);
+                        changeFragment(new ViewPagerCategoryFragment(), true);
                         break;
                     case R.id.menu_collections:
                         changeFragment(new CollectionsFragment(), true);
                         break;
+//                    case R.id.menu_test:
+////                        changeFragment(new ViewPagerCategoryFragment(), true);
+//                        break;
                     default:
                         throw new IllegalStateException("Unexpected value: " + menuItem.getItemId());
                 }
@@ -70,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
 
     public static void changeFragment(Fragment destination, boolean isHomeView) {

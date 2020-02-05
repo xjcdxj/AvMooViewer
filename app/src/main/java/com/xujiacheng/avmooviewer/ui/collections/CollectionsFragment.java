@@ -40,6 +40,11 @@ public class CollectionsFragment extends ShowAvsBaseFragment {
             public void onChanged(ArrayList<Av> avs) {
                 Log.d(TAG, "onChanged: collections size = " + avs.size());
                 collectionItemAdapter.notifyDataSetChanged();
+                if (avs.size()==0){
+                    dataStatusChange(NO_RESULT);
+                }else {
+                    dataStatusChange(LOAD_SUCCESS);
+                }
             }
         });
         mViewModel.getCollections();

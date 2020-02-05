@@ -6,9 +6,11 @@ import android.util.Log;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.xujiacheng.avmooviewer.R;
+import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class SearchFragment extends ShowAvsBaseFragment {
@@ -37,6 +39,7 @@ public class SearchFragment extends ShowAvsBaseFragment {
         if (mViewModel.queryString == null || !mViewModel.queryString.equals(queryString) || Objects.requireNonNull(mViewModel.mAvListData.getValue()).size() == 0) {
             Log.d(TAG, "uiOperation: request data");
             mViewModel.queryString = queryString;
+            mViewModel.mAvListData.setValue(new ArrayList<Av>());
             refreshData();
         } else {
             Log.d(TAG, "uiOperation: no request");

@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -22,10 +23,12 @@ import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.detail.DetailFragment;
 
 public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemViewHolder> {
-//    private static final String TAG = "BaseAdapter";
+    //    private static final String TAG = "BaseAdapter";
     private static final int LOADING = 0;
     private static final int NORMAL = 1;
-//    public static final int LOAD_MORE = 3;
+    //true表示再向上滚动
+//    private boolean isScrollingUp = false;
+    private int lastBindPosition = -1;
 
 
     BaseAdapter() {
@@ -55,17 +58,10 @@ public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemView
             avItemViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //导航到点击的视频的详情页
-//                    AnimationSet animationSet = new AnimationSet(true);
-//                    animationSet.addAnimation(new ScaleAnimation(1F, 1F, 1F, 2F));
-//                    animationSet.setDuration(500);
-//                    animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
-//                    avItemViewHolder.itemView.startAnimation(animationSet);
                     MainActivity.changeFragment(new DetailFragment(getItem(avItemViewHolder.getAdapterPosition()).url), false);
 
                 }
             });
-
         } else {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_load_more, parent, false);
             avItemViewHolder = new AvItemViewHolder(view);
@@ -80,12 +76,15 @@ public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemView
         if (position == getItemCount() - 1) {
             loadingProcess(holder);
         } else {
-            AnimationSet animationSet = new AnimationSet(true);
-            animationSet.addAnimation(new TranslateAnimation(0F, 0F, 50F, 0F));
-//            animationSet.addAnimation(new ScaleAnimation(0.5F,1F,1F,1F));
-            animationSet.setDuration(500);
-            animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
-            holder.itemView.startAnimation(animationSet);
+            if (position > lastBindPosition) {
+                AnimationSet animationSet = new AnimationSet(true);
+//                animationSet.addAnimation(new ScaleAnimation(0.75F, 1F, 0.75F, 1F));
+                animationSet.addAnimation(
+                        new TranslateAnimation(0F, 0F, 150, 0));
+                animationSet.setDuration(350);
+                animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                holder.itemView.startAnimation(animationSet);
+            }
             Av item = getItem(position);
             holder.id.setText(item.id);
             holder.name.setText(item.name);
@@ -97,6 +96,7 @@ public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemView
                     .into(holder.cover);
 
         }
+        lastBindPosition = position;
 
 
     }

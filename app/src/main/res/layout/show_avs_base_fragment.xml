@@ -27,6 +27,7 @@
             android:clickable="true"
             android:focusable="true">
 
+
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"

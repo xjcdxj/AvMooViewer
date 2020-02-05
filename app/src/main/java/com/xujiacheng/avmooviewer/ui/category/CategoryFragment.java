@@ -2,9 +2,11 @@ package com.xujiacheng.avmooviewer.ui.category;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class CategoryFragment extends ShowAvsBaseFragment {
@@ -39,6 +41,7 @@ public class CategoryFragment extends ShowAvsBaseFragment {
                 ||!mViewModel.getUrl().equals(this.categoryURL)
                 || Objects.requireNonNull(mViewModel.mAvListData.getValue()).size()==0){
             mViewModel.setUrl(this.categoryURL);
+            mViewModel.mAvListData.setValue(new ArrayList<Av>());
             refreshData();
         }else {
             mViewModel.setLoadSuccess(true);

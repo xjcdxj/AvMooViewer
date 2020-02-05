@@ -121,7 +121,6 @@ public class Crawler {
     }
 
 
-
     public static ArrayList<Category> getCategoryList(String html) {
         ArrayList<Category> categories = new ArrayList<>();
         Document document = Jsoup.parse(html);
@@ -136,5 +135,35 @@ public class Crawler {
             categories.add(new Category(name, url));
         }
         return categories;
+    }
+
+    public static ArrayList<ArrayList<Category>> getCategories(String html) {
+        ArrayList<ArrayList<Category>> allCategories = new ArrayList<ArrayList<Category>>();
+        Document document = Jsoup.parse(html);
+        //document.querySelector("body > div.container-fluid.pt-10 > div:nth-child(2)")
+        Elements elements = document.select("body > div.container-fluid > div");
+        for (Element element : elements) {
+            ArrayList<Category> categories = new ArrayList<>();
+            Elements elementsByTag = element.getElementsByTag("a");
+            for (Element categoryElement : elementsByTag) {
+                String url = categoryElement.attr("href");
+                String name = categoryElement.text();
+                categories.add(new Category(name, url));
+            }
+            allCategories.add(categories);
+        }
+        return allCategories;
+    }
+
+    public static ArrayList<String> getCategoryTabs(String html) {
+
+        ArrayList<String> result = new ArrayList<>();
+        Document document = Jsoup.parse(html);
+        //document.querySelector("body > div.container-fluid.pt-10 > h4:nth-child(1)")
+        Elements elements = document.select("body > div.container-fluid > h4");
+        for (Element element : elements) {
+            result.add(element.text());
+        }
+        return result;
     }
 }

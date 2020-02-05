@@ -35,9 +35,9 @@ public abstract class ShowAvsBaseFragment extends Fragment {
 //    private static final String TAG = "ShowAvsBaseFragment";
 
     private static final int REFRESH_DATA = 0;
-    public static final int LOAD_SUCCESS = 1;
+    protected static final int LOAD_SUCCESS = 1;
     public static final int LOAD_FAILED = 2;
-    private static final int NO_RESULT = 3;
+    protected static final int NO_RESULT = 3;
     protected Toolbar mToolbar;
     protected RecyclerView mRecyclerView;
     private ProgressBar loadingData;
@@ -65,6 +65,7 @@ public abstract class ShowAvsBaseFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 refreshData();
+                dataStatusChange(REFRESH_DATA);
             }
         });
 
@@ -80,6 +81,8 @@ public abstract class ShowAvsBaseFragment extends Fragment {
     }
 
     private void defaultConfiguration() {
+//        requireActivity().setActionBar(mToolbar);
+//        getActivity().setSupportActionBar();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         baseAdapter = new BaseAdapter() {
             @Override
@@ -120,13 +123,18 @@ public abstract class ShowAvsBaseFragment extends Fragment {
             @Override
             public void onChanged(ArrayList<Av> avs) {
                 if (avs.size() == 0) {
-                    mSwipeRefreshLayout.setVisibility(View.GONE);
-                    dataStatusChange(REFRESH_DATA);
+                    if (mBaseViewModel.isLoadFinished()) {
+                        dataStatusChange(NO_RESULT);
+                    } else {
+//                    mSwipeRefreshLayout.setVisibility(View.GONE);
+                        dataStatusChange(REFRESH_DATA);
+                    }
                 } else {
-                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+//                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     dataStatusChange(LOAD_SUCCESS);
                 }
                 if (mBaseViewModel.isDataReady()) {
+                    mSwipeRefreshLayout.setRefreshing(false);
                     if (mBaseViewModel.isLoadSuccess()) {
                         baseAdapter.submitList(new ArrayList<>(avs));
                     } else {
@@ -150,12 +158,7 @@ public abstract class ShowAvsBaseFragment extends Fragment {
 
     //刷新界面数据
     protected void refreshData() {
-//        mSwipeRefreshLayout.setVisibility(View.GONE);
-
         if (mBaseViewModel != null && baseAdapter != null) {
-//            mBaseViewModel.showAvItems.clear();
-//            mAvAdapter.notifyDataSetChanged();
-            mBaseViewModel.mAvListData.setValue(new ArrayList<Av>());
             mBaseViewModel.refreshAvData();
         }
     }
@@ -224,7 +227,6 @@ public abstract class ShowAvsBaseFragment extends Fragment {
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 break;
             case NO_RESULT:
-
                 loadFailed.setText(R.string.no_result);
                 loadingData.setVisibility(View.GONE);
                 loadFailed.setVisibility(View.VISIBLE);

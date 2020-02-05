@@ -2,9 +2,11 @@ package com.xujiacheng.avmooviewer.ui.actress.actressvideos;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.ui.base.BaseViewModel;
 import com.xujiacheng.avmooviewer.ui.base.ShowAvsBaseFragment;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ActressesVideosFragment extends ShowAvsBaseFragment {
@@ -40,6 +42,7 @@ public class ActressesVideosFragment extends ShowAvsBaseFragment {
                 || !mViewModel.mAvDataURL.equals(this.avDataURL)
                 || Objects.requireNonNull(mViewModel.mAvListData.getValue()).size() == 0) {
             mViewModel.mAvDataURL = avDataURL;
+            mViewModel.mAvListData.setValue(new ArrayList<Av>());
             refreshData();
         } else {
             mViewModel.setDataReady(true);

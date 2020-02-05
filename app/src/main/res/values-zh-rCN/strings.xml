@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Av浏览器</string>
+    <string name="actress">女优</string>
+    <string name="actress_header">女优头像</string>
+    <string name="all_vid">所有</string>
+    <string name="big_av_cover_image">封面大图</string>
+    <string name="category">分类</string>
+    <string name="click_reload">点击重新加载</string>
+    <string name="collections">收藏</string>
+    <string name="date">发行日期：</string>
+    <string name="failed">失败</string>
+    <string name="home">主页</string>
+    <string name="load_failed">加载失败！</string>
+    <string name="load_failed_click_to_retry">加载失败\\n点击重试</string>
+    <string name="load_finished">加载完成</string>
+    <string name="name">名字：</string>
+    <string name="no_more">没有更多数据了</string>
+    <string name="no_result">没有结果</string>
+    <string name="preview">预览</string>
+    <string name="refresh">刷新</string>
+    <string name="search_for">搜索：</string>
+    <string name="small_av_cover_image">封面小图</string>
+</resources>
