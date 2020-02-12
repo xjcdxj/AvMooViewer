@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xujiacheng.avmooviewer.R;
 import com.xujiacheng.avmooviewer.itembean.Av;
 
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 
 //显示视频列表的fragment抽象类，已经提取出了一些控件供使用
 public abstract class ShowAvsBaseFragment extends Fragment {
-//    private static final String TAG = "ShowAvsBaseFragment";
+    private static final String TAG = "ShowAvsBaseFragment";
 
     private static final int REFRESH_DATA = 0;
     protected static final int LOAD_SUCCESS = 1;
@@ -47,6 +48,8 @@ public abstract class ShowAvsBaseFragment extends Fragment {
     private BaseViewModel mBaseViewModel;
     private BaseAdapter baseAdapter;
 
+
+    private FloatingActionButton scrollTop;
 
     public ShowAvsBaseFragment() {
 
@@ -110,6 +113,20 @@ public abstract class ShowAvsBaseFragment extends Fragment {
                 }
             }
         };
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy < 0) {
+                    scrollTop.setVisibility(View.VISIBLE);
+                } else {
+                    scrollTop.setVisibility(View.GONE);
+                }
+            }
+        });
+
         mRecyclerView.setAdapter(baseAdapter);
         //下拉刷新
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -173,6 +190,13 @@ public abstract class ShowAvsBaseFragment extends Fragment {
         mToolbar = view.findViewById(R.id.detail_toolbar);
         loadFailed = view.findViewById(R.id.load_failed_text);
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
+        scrollTop = view.findViewById(R.id.scroll_top);
+        scrollTop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRecyclerView.smoothScrollToPosition(0);
+            }
+        });
         mSwipeRefreshLayout.setEnabled(false);
         mRecyclerView = view.findViewById(R.id.recycler_view);
         drawerLayout = requireActivity().findViewById(R.id.drawer_layout);

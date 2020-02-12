@@ -2,7 +2,6 @@ package com.xujiacheng.avmooviewer.ui.allvideos;
 
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.SearchView;
 
 import androidx.appcompat.widget.Toolbar;
@@ -45,13 +44,6 @@ public class AllAvFragment extends ShowAvsBaseFragment {
             }
         });
         mToolbar.setTitle(getString(R.string.home));
-        mToolbar.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                mRecyclerView.smoothScrollToPosition(0);
-                return false;
-            }
-        });
         final SearchView mSearchView = (SearchView) mToolbar.getMenu()
                 .findItem(R.id.menu_search)
                 .getActionView();

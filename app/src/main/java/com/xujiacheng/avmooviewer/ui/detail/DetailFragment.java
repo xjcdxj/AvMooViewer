@@ -1,5 +1,6 @@
 package com.xujiacheng.avmooviewer.ui.detail;
 
+import android.animation.Animator;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +8,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -28,8 +34,10 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xujiacheng.avmooviewer.MainActivity;
 import com.xujiacheng.avmooviewer.R;
+import com.xujiacheng.avmooviewer.databinding.DetailFragmentBinding;
 import com.xujiacheng.avmooviewer.itembean.Av;
 import com.xujiacheng.avmooviewer.itembean.Info;
 import com.xujiacheng.avmooviewer.ui.actress.actressvideos.ActressesVideosFragment;
@@ -45,6 +53,7 @@ public class DetailFragment extends Fragment {
 
 
     private DetailViewModel mViewModel;
+    private DetailFragmentBinding binding;
 
 
     public DetailFragment() {
@@ -59,11 +68,24 @@ public class DetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
+        binding = DetailFragmentBinding.inflate(inflater, container, false);
         mViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
-
+        binding.setData(mViewModel);
         mViewModel.checkCollections(this.url);
 
         final Toolbar toolbar = view.findViewById(R.id.detail_toolbar);
+        final FloatingActionButton collectionButton = view.findViewById(R.id.collection_button);
+        collectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Objects.requireNonNull(mViewModel.av.getValue()).url == null) {
+                    Toast.makeText(requireContext(), "Please wait", Toast.LENGTH_SHORT).show();
+                } else {
+
+                    mViewModel.addToFavorite();
+                }
+            }
+        });
         toolbar.inflateMenu(R.menu.favorite);
         final ImageView cover = view.findViewById(R.id.item_detail_cover);
         final ProgressBar coverLoading = view.findViewById(R.id.item_detail_cover_loading);
@@ -81,6 +103,7 @@ public class DetailFragment extends Fragment {
                     Toast.makeText(requireContext(), "Please wait", Toast.LENGTH_SHORT).show();
                 } else {
                     mViewModel.addToFavorite();
+
                 }
                 return false;
             }
@@ -94,12 +117,50 @@ public class DetailFragment extends Fragment {
         });
         mViewModel.isInCollection.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
-            public void onChanged(Boolean aBoolean) {
-                if (aBoolean) {
-                    addToCollectionMenu.setIcon(R.drawable.ic_star_black_24dp);
-                } else {
-                    addToCollectionMenu.setIcon(R.drawable.ic_star_border_black_24dp);
-                }
+            public void onChanged(final Boolean aBoolean) {
+                final AnimationSet scale = new AnimationSet(true);
+                scale.addAnimation(new ScaleAnimation(1F, 0F, 1F, 0F,
+                        Animation.ABSOLUTE, collectionButton.getWidth() / 2,
+                        Animation.ABSOLUTE, collectionButton.getHeight() / 2));
+                scale.setDuration(150);
+//                scale.setFillBefore(false);
+                scale.setInterpolator(new AccelerateDecelerateInterpolator());
+                scale.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        if (aBoolean) {
+                            addToCollectionMenu.setIcon(R.drawable.ic_star_black_24dp);
+                            collectionButton.setImageResource(R.drawable.ic_star_black_24dp);
+                        } else {
+                            addToCollectionMenu.setIcon(R.drawable.ic_star_border_black_24dp);
+                            collectionButton.setImageResource(R.drawable.ic_star_border_black_24dp);
+                        }
+                        AnimationSet expand = new AnimationSet(true);
+                        expand.addAnimation(new ScaleAnimation(0F, 1F, 0F, 1F,
+                                Animation.ABSOLUTE, collectionButton.getWidth() / 2,
+                                Animation.ABSOLUTE, collectionButton.getHeight() / 2));
+                        expand.setDuration(150);
+//                        expand.setFillBefore(false);
+                        expand.setInterpolator(new AccelerateDecelerateInterpolator());
+                        expand.cancel();
+                        expand.reset();
+                        collectionButton.startAnimation(expand);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                scale.cancel();
+                scale.reset();
+                collectionButton.startAnimation(scale);
+
+
             }
         });
         mViewModel.loadAvInfo(DetailFragment.this.url);
@@ -112,12 +173,10 @@ public class DetailFragment extends Fragment {
                     Log.d(TAG, "onChanged: height = " + height);
                     final int width = cover.getWidth();
                     Log.d(TAG, "onChanged: width = " + width);
-
                     Glide.with(DetailFragment.this)
                             .asBitmap()
                             .load(av.bigCoverURL)
-//                            .placeholder(R.drawable.avmooviewer)
-
+                            .placeholder(R.drawable.avmooviewer)
                             .listener(new RequestListener<Bitmap>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
@@ -127,7 +186,6 @@ public class DetailFragment extends Fragment {
 
                                 @Override
                                 public boolean onResourceReady(final Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-
                                     coverLoading.setVisibility(View.GONE);
                                     return false;
 
@@ -136,7 +194,7 @@ public class DetailFragment extends Fragment {
                             .into(cover);
 
                     name.setText(av.name);
-                    toolbar.setTitle(av.name);
+//                    toolbar.setTitle(av.name);
                     id.setText(av.id);
                     date.setText(av.releaseDate);
                     if (av.actors != null && av.actors.size() > 0) {
@@ -207,21 +265,8 @@ public class DetailFragment extends Fragment {
                 Glide.with(DetailFragment.this)
                         .asBitmap()
                         .load(getItem(position).imageURL)
-                        .transition(withCrossFade())
                         .placeholder(R.drawable.woman)
-                        .listener(new RequestListener<Bitmap>() {
-                            @Override
-                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-
-                                return false;
-                            }
-                        })
-                        .fitCenter()
+                        .error(R.drawable.ic_broken_image_black_24dp)
                         .into(header);
                 TextView name = convertView.findViewById(R.id.item_actress_name);
                 name.setText(getItem(position).name);

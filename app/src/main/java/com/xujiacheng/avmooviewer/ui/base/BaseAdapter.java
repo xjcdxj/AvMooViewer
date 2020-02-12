@@ -83,6 +83,8 @@ public abstract class BaseAdapter extends ListAdapter<Av, BaseAdapter.AvItemView
                         new TranslateAnimation(0F, 0F, 150, 0));
                 animationSet.setDuration(350);
                 animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+                animationSet.cancel();
+                animationSet.reset();
                 holder.itemView.startAnimation(animationSet);
             }
             Av item = getItem(position);

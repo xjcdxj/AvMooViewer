@@ -23,6 +23,6 @@
     <string name="load_failed_click_to_retry">Load failed!\nClick retry</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="no_result">No Result</string>
 </resources>
